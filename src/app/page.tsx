@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Camera, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
+import { ThemeToggle } from '@/components/theme-toggle';
 
 // Example structure of an item from the API
 interface ApiImageItem {
@@ -114,6 +115,7 @@ export default function InstaShowPage() {
               <Camera className="w-8 h-8 text-primary" />
               <h1 className="text-2xl font-bold tracking-tight text-foreground">InstaShow</h1>
             </div>
+            <ThemeToggle />
           </div>
         </header>
 
