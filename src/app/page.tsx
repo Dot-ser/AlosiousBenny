@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -78,7 +77,7 @@ export default function HomePage() {
       <main className="flex-grow container mx-auto px-4 py-12 sm:py-16 md:py-20 flex flex-col items-center text-center">
         <div className="mb-8">
           <Image
-            src="https://picsum.photos/160/160" 
+            src="https://files.catbox.moe/k23ytz.jpg" 
             alt="Alosious Benny"
             width={160}
             height={160}
@@ -137,4 +136,3 @@ export default function HomePage() {
     </div>
   );
 }
-
