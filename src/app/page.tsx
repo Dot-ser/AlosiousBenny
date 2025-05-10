@@ -52,7 +52,7 @@ export default function HomePage() {
   const personalDetails: DetailItemProps[] = [
     { icon: User, label: "Age", value: "20" },
     { icon: MapPin, label: "Location", value: "Idukki, Kerala" },
-    { icon: Briefcase, label: "Studying", value: "Cyber Forensics" },
+
   ];
 
   const hobbies = [
@@ -125,7 +125,7 @@ export default function HomePage() {
             </a>
           </Button>
           <Button asChild size="lg" variant="secondary" className="px-8 py-6 text-lg shadow-lg hover:shadow-muted-foreground/30 transition-all duration-300 transform hover:scale-105">
-            <a href="https://alosiousbenny.vercel.app/playlist" target="_blank" rel="noopener noreferrer">
+            <a href="https://alosiousbenny.vercel.app/Playlist" target="_blank" rel="noopener noreferrer">
               My Playlist <ListMusic size={20} className="ml-2" />
             </a>
           </Button>

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import type { ImageType, UserProfile } from '@/types';
 import { ImageGrid } from '@/components/image-grid';
 import { Toaster } from '@/components/ui/toaster';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react'; // Kept for potential future use, but not used by SplashScreen anymore
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -53,38 +53,11 @@ const mapApiDataToImageType = (apiData: ApiImageItem[]): ImageType[] => {
 };
 
 
-function SplashScreen({ onFinished }: { onFinished: () => void }) {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onFinished();
-    }, 1500); // Reduced splash screen duration
-    return () => clearTimeout(timer);
-  }, [onFinished]);
-
-  return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background transition-opacity duration-500 ease-in-out">
-      <div className="w-full max-w-xl p-4">
-        <SkeletonCard />
-        <div className="mt-8">
-         <SkeletonCard />
-        </div>
-      </div>
-       <div className="absolute bottom-8 text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mb-2 mx-auto" />
-        <p className="text-lg font-semibold text-foreground">DOT007 Gallery</p>
-        <p className="text-sm text-muted-foreground">Moments unfolding...</p>
-      </div>
-    </div>
-  );
-}
-
-
 export default function GalleryPage() {
   const [images, setImages] = useState<ImageType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [isSplashVisible, setIsSplashVisible] = useState(true);
 
   useEffect(() => {
     setIsClient(true); // Mount only on client
@@ -131,13 +104,10 @@ export default function GalleryPage() {
   };
 
   if (!isClient || (isLoading && images.length === 0 && !error)) {
-    if (isSplashVisible) {
-       return <SplashScreen onFinished={() => setIsSplashVisible(false)} />;
-    }
-    // Show skeleton cards if splash is done but still loading initial data
+    // Show skeleton cards during initial loading
     return (
-      <div className="min-h-screen bg-background">
-         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="min-h-screen bg-background flex flex-col">
+         <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Logo />
             <div className="flex items-center gap-2">
@@ -145,14 +115,14 @@ export default function GalleryPage() {
             </div>
           </div>
         </header>
-        <main className="container mx-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8">
           <div className="space-y-8">
             {Array.from({ length: 3 }).map((_, index) => (
               <SkeletonCard key={`initial-skeleton-${index}`} />
             ))}
           </div>
         </main>
-         <footer className="text-center p-6 text-sm text-muted-foreground border-t">
+         <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60">
           <p>&copy; {new Date().getFullYear()} DOT007. All rights reserved.</p>
         </footer>
       </div>
@@ -162,8 +132,8 @@ export default function GalleryPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-background">
-        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="min-h-screen bg-background flex flex-col">
+        <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Logo />
             <div className="flex items-center gap-2">
@@ -172,8 +142,7 @@ export default function GalleryPage() {
           </div>
         </header>
 
-        <main className="container mx-auto p-4 md:p-6 lg:p-8">
-          {/* Error display remains the same */}
+        <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8">
           {error && (
             <Alert variant="destructive" className="my-4">
               <Terminal className="h-4 w-4" />
@@ -183,12 +152,17 @@ export default function GalleryPage() {
               </AlertDescription>
             </Alert>
           )}
-          {!error && (
+          {!error && images.length > 0 && (
             <ImageGrid images={images} onLikeToggle={handleLikeToggle} />
+          )}
+          {!error && !isLoading && images.length === 0 && (
+             <div className="text-center text-muted-foreground py-10">
+                <p>No images found or unable to load gallery.</p>
+             </div>
           )}
         </main>
 
-        <footer className="text-center p-6 text-sm text-muted-foreground border-t">
+        <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60">
           <p>&copy; {new Date().getFullYear()} DOT007. All rights reserved.</p>
         </footer>
       </div>
