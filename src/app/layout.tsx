@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
+// import { GeistMono } from 'geist/font/mono'; // Removed due to module not found error
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"; // Ensure Toaster is available globally if needed, or per-page
+import { Toaster } from "@/components/ui/toaster"; 
 
 export const metadata: Metadata = {
   title: 'InstaShow',
@@ -15,11 +15,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className={`${GeistSans.variable}`}> {/* Removed GeistMono.variable */}
       <body className="font-sans antialiased">
         {children}
-        {/* Toaster can be placed here if used across many pages, or in specific page layouts */}
-        {/* For this app, page.tsx already includes it, which is fine for a single-page focus. */}
+        <Toaster />
       </body>
     </html>
   );

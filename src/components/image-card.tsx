@@ -21,7 +21,7 @@ export function ImageCard({ image, onLikeToggle }: ImageCardProps) {
       <CardHeader className="flex flex-row items-center justify-between p-3 border-b">
         <div className="flex items-center space-x-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={image.user.avatarUrl} alt={image.user.name} data-ai-hint="profile picture" />
+            <AvatarImage src={image.user.avatarUrl} alt={image.user.name} data-ai-hint="profile picture user" />
             <AvatarFallback>{image.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <span className="font-semibold text-sm">{image.user.name}</span>
@@ -39,8 +39,9 @@ export function ImageCard({ image, onLikeToggle }: ImageCardProps) {
             alt={image.alt}
             layout="fill"
             objectFit="cover"
-            className="bg-gray-100"
-            data-ai-hint="instagram post"
+            className="bg-muted"
+            data-ai-hint="social media post"
+            unoptimized={image.src.startsWith('https://files.catbox.moe')} // Bypass optimization for catbox.moe if needed
           />
         </div>
       </CardContent>
@@ -74,7 +75,7 @@ export function ImageCard({ image, onLikeToggle }: ImageCardProps) {
             <span className="font-semibold">{image.user.name}</span>{' '}
             {image.caption}
           </p>
-          {image.hashtags.length > 0 && (
+          {image.hashtags && image.hashtags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {image.hashtags.map((tag) => (
                 <Badge key={tag} variant="secondary" className="text-primary cursor-pointer hover:underline">
