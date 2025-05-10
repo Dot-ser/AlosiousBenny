@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
-// import { GeistMono } from 'geist/font/mono'; // Removed due to module not found error
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"; 
 
@@ -15,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}> {/* Removed GeistMono.variable */}
+    <html lang="en" className={GeistSans.variable}>
       <body className="font-sans antialiased">
         {children}
         <Toaster />
