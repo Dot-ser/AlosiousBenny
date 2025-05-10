@@ -8,12 +8,6 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
 import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb } from 'lucide-react';
 
-// Removed metadata export as this is a client component
-// export const metadata: Metadata = {
-// title: "Alosious Benny - Portfolio",
-// description: "The personal portfolio of Alosious Benny, a Cyber Forensic Student.",
-// };
-
 interface SocialLinkProps {
   href: string;
   label: string;
@@ -26,7 +20,7 @@ const SocialLinkItem: React.FC<SocialLinkProps> = ({ href, label, icon: Icon }) 
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
-    className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-accent/20" // Adjusted hover background
+    className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-accent/20"
   >
     <Icon size={28} />
   </a>
@@ -84,7 +78,7 @@ export default function HomePage() {
       <main className="flex-grow container mx-auto px-4 py-12 sm:py-16 md:py-20 flex flex-col items-center text-center">
         <div className="mb-8">
           <Image
-            src="/logo.png" 
+            src="https://picsum.photos/160/160" 
             alt="Alosious Benny"
             width={160}
             height={160}
@@ -143,3 +137,4 @@ export default function HomePage() {
     </div>
   );
 }
+
