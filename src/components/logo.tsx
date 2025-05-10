@@ -1,13 +1,18 @@
 
 import Link from 'next/link';
-import { Camera } from 'lucide-react'; // Or your preferred logo icon
+import Image from 'next/image';
 
 export function Logo() {
   return (
     <Link href="/" className="flex items-center space-x-2 group" aria-label="DOT007 Home">
-      {/* You can replace Camera with an Image component for a custom logo */}
-      {/* <Image src="/path/to/your/logo.png" alt="DOT007 Logo" width={32} height={32} className="rounded-full" /> */}
-      <Camera className="h-7 w-7 text-primary group-hover:text-accent transition-colors" />
+      <Image 
+        src="https://files.catbox.moe/k23ytz.jpg" 
+        alt="DOT007 Logo" 
+        width={32} 
+        height={32} 
+        className="rounded-full border-2 border-primary/50 group-hover:border-accent transition-colors object-cover"
+        data-ai-hint="logo company" 
+      />
       <span className="font-bold text-xl tracking-tight text-foreground group-hover:text-primary transition-colors">
         DOT007
       </span>
