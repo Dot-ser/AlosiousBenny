@@ -1,170 +1,96 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import type { ImageType, UserProfile } from '@/types';
-import { ImageGrid } from '@/components/image-grid';
-import { Toaster } from '@/components/ui/toaster';
-import { Camera, Loader2 } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { SkeletonCard } from '@/components/skeleton-card';
+import { Logo } from '@/components/logo';
+import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink } from 'lucide-react';
 
-// Example structure of an item from the API
-interface ApiImageItem {
-  hashtags: string;
-  name: string;
-  src: string;
-  username: string;
-  username_img: string;
-  // Add any other fields that might come from the API
-  id?: string | number; // Optional ID if API provides one
-  likes?: number;
-  commentsCount?: number;
-  sharesCount?: number;
-  liked?: boolean;
-  timestamp?: string;
-}
-
-
-const mapApiDataToImageType = (apiData: ApiImageItem[]): ImageType[] => {
-  return apiData.map((item, index) => {
-    const user: UserProfile = {
-      name: item.username,
-      avatarUrl: item.username_img,
-    };
-    return {
-      id: item.id?.toString() || `api-${index}-${Date.now()}`,
-      src: item.src,
-      alt: item.name || `Image by ${item.username}`,
-      caption: item.name,
-      hashtags: typeof item.hashtags === 'string' 
-        ? item.hashtags.split(',').map(tag => tag.trim().replace(/\s+/g, '')).filter(tag => tag) 
-        : [],
-      likes: item.likes ?? Math.floor(Math.random() * 500), 
-      commentsCount: item.commentsCount ?? Math.floor(Math.random() * 50), 
-      sharesCount: item.sharesCount ?? Math.floor(Math.random() * 20), 
-      liked: item.liked ?? Math.random() > 0.5, 
-      user: user,
-      timestamp: item.timestamp ?? `${Math.floor(Math.random() * 24) + 1} HOURS AGO`,
-    };
-  });
+export const metadata: Metadata = {
+  title: "Alosious Benny - Welcome",
+  description: "Welcome to the personal page of Alosious Benny. Discover the gallery and social profiles.",
 };
 
+interface SocialLinkProps {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+}
 
-export default function InstaShowPage() {
-  const [images, setImages] = useState<ImageType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
+const SocialLinkItem: React.FC<SocialLinkProps> = ({ href, label, icon: Icon }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={label}
+    className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-accent"
+  >
+    <Icon size={28} />
+  </a>
+);
 
-  useEffect(() => {
-    setIsClient(true);
-    const fetchImages = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('https://songapi-qzdn.onrender.com/posts');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: ApiImageItem[] = await response.json();
-        const loadedImages = mapApiDataToImageType(data);
-        setImages(loadedImages);
-      } catch (e) {
-        if (e instanceof Error) {
-          setError(e.message);
-        } else {
-          setError('An unknown error occurred');
-        }
-        console.error("Failed to fetch images:", e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchImages();
-  }, []);
-
-
-  const handleLikeToggle = (id: string) => {
-    setImages((prevImages) =>
-      prevImages.map((img) =>
-        img.id === id
-          ? { ...img, liked: !img.liked, likes: img.liked ? img.likes - 1 : img.likes + 1 }
-          : img
-      )
-    );
-  };
-
-  if (!isClient) {
-    // Render a consistent server-side loading state
-    return (
-      <div className="min-h-screen bg-background">
-        <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Camera className="w-8 h-8 text-primary" />
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">InstaShow</h1>
-            </div>
-            <ThemeToggle />
-          </div>
-        </header>
-        <main className="container mx-auto p-4 md:p-6 lg:p-8">
-          <div className="space-y-8">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <SkeletonCard key={`server-skeleton-${index}`} />
-            ))}
-          </div>
-        </main>
-         <footer className="text-center p-6 text-sm text-muted-foreground border-t">
-          <p>&copy; {new Date().getFullYear()} InstaShow. All rights reserved.</p>
-        </footer>
-      </div>
-    );
-  }
+export default function HomePage() {
+  const socialLinks: SocialLinkProps[] = [
+    { href: "http://instagram.com/_alosious_benny", label: "Instagram", icon: Instagram },
+    { href: "https://www.linkedin.com/in/alosious-benny-a04bba30a", label: "LinkedIn", icon: Linkedin },
+    { href: "https://twitter.com/alosious_benny", label: "X (Twitter)", icon: Twitter },
+    { href: "https://github.com/DOT-007", label: "GitHub", icon: Github },
+    { href: "https://www.facebook.com/alosious.benny.1", label: "Facebook", icon: Facebook },
+    { href: "https://t.me/dotsermodz", label: "Telegram", icon: Send },
+  ];
 
   return (
-    <>
-      <div className="min-h-screen bg-background">
-        <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Camera className="w-8 h-8 text-primary" />
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">InstaShow</h1>
-            </div>
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Logo />
+          <div className="flex items-center gap-2">
             <ThemeToggle />
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main className="container mx-auto p-4 md:p-6 lg:p-8">
-          {isLoading && !error && (
-            <div className="space-y-8">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <SkeletonCard key={`client-skeleton-${index}`} />
-              ))}
-            </div>
-          )}
-          {error && (
-            <Alert variant="destructive" className="my-4">
-              <Terminal className="h-4 w-4" />
-              <AlertTitle>Error Fetching Images</AlertTitle>
-              <AlertDescription>
-                {error}. Please try refreshing the page.
-              </AlertDescription>
-            </Alert>
-          )}
-          {!isLoading && !error && (
-            <ImageGrid images={images} onLikeToggle={handleLikeToggle} />
-          )}
-        </main>
+      <main className="flex-grow container mx-auto px-4 py-16 sm:py-24 flex flex-col items-center justify-center text-center">
+        <div className="mb-10">
+          <Image
+            src="/logo.png"
+            alt="Alosious Benny"
+            width={150}
+            height={150}
+            className="rounded-full shadow-xl border-4 border-card object-cover"
+            priority
+            data-ai-hint="profile picture large"
+          />
+        </div>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 tracking-tight">
+          Alosious Benny
+        </h1>
+        <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-xl">
+          Welcome! Discover my visual stories and connect with me across the web.
+        </p>
 
-        <footer className="text-center p-6 text-sm text-muted-foreground border-t">
-          <p>&copy; {new Date().getFullYear()} InstaShow. All rights reserved.</p>
-        </footer>
-      </div>
-      <Toaster />
-    </>
+        <Button asChild size="lg" className="px-10 py-6 text-lg shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
+          <Link href="/gallery">
+            View Gallery <ExternalLink size={20} className="ml-2" />
+          </Link>
+        </Button>
+
+        <div className="mt-16 pt-8 border-t border-border/50 w-full max-w-md">
+          <h2 className="text-sm uppercase text-muted-foreground mb-6 tracking-wider">Connect with me</h2>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-4">
+            {socialLinks.map((link) => (
+              <SocialLinkItem key={link.href} {...link} />
+            ))}
+          </div>
+        </div>
+      </main>
+
+      <footer className="text-center p-8 text-sm text-muted-foreground border-t">
+        <p>&copy; {new Date().getFullYear()} Alosious Benny. All rights reserved.</p>
+      </footer>
+    </div>
   );
 }
