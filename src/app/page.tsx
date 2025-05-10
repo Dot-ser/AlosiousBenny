@@ -9,6 +9,7 @@ import { Camera, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
+import { SkeletonCard } from '@/components/skeleton-card';
 
 // Example structure of an item from the API
 interface ApiImageItem {
@@ -98,10 +99,28 @@ export default function InstaShowPage() {
   };
 
   if (!isClient) {
-    // Render nothing or a loading indicator on the server to avoid hydration mismatch
+    // Render a consistent server-side loading state
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Camera className="w-8 h-8 text-primary" />
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">InstaShow</h1>
+            </div>
+            <ThemeToggle />
+          </div>
+        </header>
+        <main className="container mx-auto p-4 md:p-6 lg:p-8">
+          <div className="space-y-8">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <SkeletonCard key={`server-skeleton-${index}`} />
+            ))}
+          </div>
+        </main>
+         <footer className="text-center p-6 text-sm text-muted-foreground border-t">
+          <p>&copy; {new Date().getFullYear()} InstaShow. All rights reserved.</p>
+        </footer>
       </div>
     );
   }
@@ -120,9 +139,11 @@ export default function InstaShowPage() {
         </header>
 
         <main className="container mx-auto p-4 md:p-6 lg:p-8">
-          {isLoading && (
-            <div className="flex justify-center items-center py-10">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          {isLoading && !error && (
+            <div className="space-y-8">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <SkeletonCard key={`client-skeleton-${index}`} />
+              ))}
             </div>
           )}
           {error && (
