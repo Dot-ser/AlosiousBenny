@@ -1,18 +1,18 @@
 
 'use client';
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
-import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink } from 'lucide-react';
+import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: "Alosious Benny - Welcome",
-  description: "Welcome to the personal page of Alosious Benny. Discover the gallery and social profiles.",
-};
+// Removed metadata export as this is a client component
+// export const metadata: Metadata = {
+// title: "Alosious Benny - Portfolio",
+// description: "The personal portfolio of Alosious Benny, a Cyber Forensic Student.",
+// };
 
 interface SocialLinkProps {
   href: string;
@@ -26,11 +26,25 @@ const SocialLinkItem: React.FC<SocialLinkProps> = ({ href, label, icon: Icon }) 
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
-    className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-accent"
+    className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-accent/20" // Adjusted hover background
   >
     <Icon size={28} />
   </a>
 );
+
+interface DetailItemProps {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}
+
+const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, value }) => (
+  <div className="flex items-center justify-center text-lg space-x-2">
+    <Icon className="h-5 w-5 text-primary" />
+    <span className="text-muted-foreground"><span className="font-semibold text-foreground/90">{label}:</span> {value}</span>
+  </div>
+);
+
 
 export default function HomePage() {
   const socialLinks: SocialLinkProps[] = [
@@ -42,9 +56,23 @@ export default function HomePage() {
     { href: "https://t.me/dotsermodz", label: "Telegram", icon: Send },
   ];
 
+  const personalDetails: DetailItemProps[] = [
+    { icon: User, label: "Age", value: "20" },
+    { icon: MapPin, label: "Location", value: "Idukki, Kerala" },
+    { icon: Briefcase, label: "Studying", value: "Cyber Forensics" },
+  ];
+
+  const hobbies = [
+    "Developing Python Projects",
+    "Building Personal Tech Initiatives",
+    "Exploring Cyber Security & Digital Forensics",
+    "Contributing to Open Source Software",
+    "Learning new Programming Languages & Frameworks",
+  ];
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2">
@@ -53,34 +81,55 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="flex-grow container mx-auto px-4 py-16 sm:py-24 flex flex-col items-center justify-center text-center">
-        <div className="mb-10">
+      <main className="flex-grow container mx-auto px-4 py-12 sm:py-16 md:py-20 flex flex-col items-center text-center">
+        <div className="mb-8">
           <Image
-            src="/logo.png"
+            src="/logo.png" 
             alt="Alosious Benny"
-            width={150}
-            height={150}
-            className="rounded-full shadow-xl border-4 border-card object-cover"
+            width={160}
+            height={160}
+            className="rounded-full shadow-2xl border-4 border-primary/50 object-cover"
             priority
-            data-ai-hint="profile picture large"
+            data-ai-hint="profile picture person"
           />
         </div>
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 tracking-tight">
           Alosious Benny
         </h1>
-        <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-xl">
-          Welcome! Discover my visual stories and connect with me across the web.
-        </p>
+        
+        {/* Personal Details Section */}
+        <div className="max-w-xl mb-8 space-y-3">
+          {personalDetails.map(detail => (
+            <DetailItem key={detail.label} icon={detail.icon} label={detail.label} value={detail.value} />
+          ))}
+        </div>
 
-        <Button asChild size="lg" className="px-10 py-6 text-lg shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
+        {/* Hobbies/Interests Section */}
+        <div className="max-w-2xl w-full mb-10 text-left px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-center text-foreground flex items-center justify-center gap-2">
+            <Lightbulb className="h-7 w-7 text-primary" />
+            Interests & Activities
+          </h2>
+          <ul className="list-none space-y-3 text-muted-foreground">
+            {hobbies.map((hobby, index) => (
+              <li key={index} className="flex items-start p-3 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <span className="text-primary mr-3 mt-1">&#10003;</span> {/* Checkmark or other icon */}
+                <span className="text-lg">{hobby}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <Button asChild size="lg" className="mb-12 px-10 py-6 text-lg shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
           <Link href="/gallery">
-            View Gallery <ExternalLink size={20} className="ml-2" />
+            Explore My Gallery <ExternalLink size={20} className="ml-2" />
           </Link>
         </Button>
 
-        <div className="mt-16 pt-8 border-t border-border/50 w-full max-w-md">
-          <h2 className="text-sm uppercase text-muted-foreground mb-6 tracking-wider">Connect with me</h2>
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-4">
+        {/* Social Links Section */}
+        <div className="mt-12 pt-10 border-t border-border/60 w-full max-w-lg">
+          <h2 className="text-base uppercase text-muted-foreground mb-6 tracking-wider font-semibold">Connect With Me</h2>
+          <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-4">
             {socialLinks.map((link) => (
               <SocialLinkItem key={link.href} {...link} />
             ))}
@@ -88,7 +137,7 @@ export default function HomePage() {
         </div>
       </main>
 
-      <footer className="text-center p-8 text-sm text-muted-foreground border-t">
+      <footer className="text-center p-8 text-sm text-muted-foreground border-t border-border/60">
         <p>&copy; {new Date().getFullYear()} Alosious Benny. All rights reserved.</p>
       </footer>
     </div>
