@@ -11,12 +11,13 @@ import { Terminal } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
-import type { Metadata } from 'next';
+// Removed: import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: "Gallery - Alosious Benny",
-  description: "Explore the visual gallery of Alosious Benny.",
-};
+// Removed metadata export:
+// export const metadata: Metadata = {
+// title: "Gallery - Alosious Benny",
+// description: "Explore the visual gallery of Alosious Benny.",
+// };
 
 // Example structure of an item from the API
 interface ApiImageItem {
@@ -62,22 +63,22 @@ function SplashScreen({ onFinished }: { onFinished: () => void }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onFinished();
-    }, 2500); // Adjust splash screen duration as needed
+    }, 1500); // Reduced splash screen duration
     return () => clearTimeout(timer);
   }, [onFinished]);
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background transition-opacity duration-500 ease-in-out">
       <div className="w-full max-w-xl p-4">
-        <SkeletonCard /> 
+        <SkeletonCard />
         <div className="mt-8">
          <SkeletonCard />
         </div>
       </div>
        <div className="absolute bottom-8 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-2 mx-auto" />
-        <p className="text-lg font-semibold text-foreground">Loading Gallery...</p>
-        <p className="text-sm text-muted-foreground">Please wait a moment.</p>
+        <p className="text-lg font-semibold text-foreground">InstaShow Gallery</p>
+        <p className="text-sm text-muted-foreground">Moments unfolding...</p>
       </div>
     </div>
   );
@@ -135,10 +136,36 @@ export default function GalleryPage() {
     );
   };
 
-  if (!isClient || isSplashVisible) {
-    return <SplashScreen onFinished={() => setIsSplashVisible(false)} />;
+  if (!isClient || (isLoading && images.length === 0 && !error)) {
+    if (isSplashVisible) {
+       return <SplashScreen onFinished={() => setIsSplashVisible(false)} />;
+    }
+    // Show skeleton cards if splash is done but still loading initial data
+    return (
+      <div className="min-h-screen bg-background">
+         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <Logo />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+            </div>
+          </div>
+        </header>
+        <main className="container mx-auto p-4 md:p-6 lg:p-8">
+          <div className="space-y-8">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <SkeletonCard key={`initial-skeleton-${index}`} />
+            ))}
+          </div>
+        </main>
+         <footer className="text-center p-6 text-sm text-muted-foreground border-t">
+          <p>&copy; {new Date().getFullYear()} InstaShow. All rights reserved.</p>
+        </footer>
+      </div>
+    );
   }
-  
+
+
   return (
     <>
       <div className="min-h-screen bg-background">
@@ -152,13 +179,7 @@ export default function GalleryPage() {
         </header>
 
         <main className="container mx-auto p-4 md:p-6 lg:p-8">
-          {isLoading && !error && (
-            <div className="space-y-8">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <SkeletonCard key={`client-skeleton-${index}`} />
-              ))}
-            </div>
-          )}
+          {/* Error display remains the same */}
           {error && (
             <Alert variant="destructive" className="my-4">
               <Terminal className="h-4 w-4" />
@@ -168,13 +189,13 @@ export default function GalleryPage() {
               </AlertDescription>
             </Alert>
           )}
-          {!isLoading && !error && (
+          {!error && (
             <ImageGrid images={images} onLikeToggle={handleLikeToggle} />
           )}
         </main>
 
         <footer className="text-center p-6 text-sm text-muted-foreground border-t">
-          <p>&copy; {new Date().getFullYear()} Alosious Benny's Gallery. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} InstaShow. All rights reserved.</p>
         </footer>
       </div>
       <Toaster />
