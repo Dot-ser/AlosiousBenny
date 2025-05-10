@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
-import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb } from 'lucide-react';
+import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic } from 'lucide-react';
 
 interface SocialLinkProps {
   href: string;
@@ -113,11 +113,24 @@ export default function HomePage() {
           </ul>
         </div>
         
-        <Button asChild size="lg" className="mb-12 px-10 py-6 text-lg shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
-          <Link href="/gallery">
-            Explore My Gallery <ExternalLink size={20} className="ml-2" />
-          </Link>
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4 mb-12">
+          <Button asChild size="lg" className="px-8 py-6 text-lg shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
+            <Link href="/gallery">
+              Explore My Gallery <ExternalLink size={20} className="ml-2" />
+            </Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="px-8 py-6 text-lg shadow-lg hover:shadow-accent/30 transition-all duration-300 transform hover:scale-105">
+            <a href="https://github.com/Dot-ser?tab=repositories" target="_blank" rel="noopener noreferrer">
+              My Projects <FolderGit2 size={20} className="ml-2" />
+            </a>
+          </Button>
+          <Button asChild size="lg" variant="secondary" className="px-8 py-6 text-lg shadow-lg hover:shadow-muted-foreground/30 transition-all duration-300 transform hover:scale-105">
+            <a href="https://alosiousbenny.vercel.app/playlist" target="_blank" rel="noopener noreferrer">
+              My Playlist <ListMusic size={20} className="ml-2" />
+            </a>
+          </Button>
+        </div>
+
 
         {/* Social Links Section */}
         <div className="mt-12 pt-10 border-t border-border/60 w-full max-w-lg">
