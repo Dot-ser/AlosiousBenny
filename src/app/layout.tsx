@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
 export const metadata: Metadata = {
-  title: 'InstaShow',
+  title: 'DOT007',
   description: 'Showcase your images with an Instagram-like UI, powered by AI hashtag suggestions.',
 };
 

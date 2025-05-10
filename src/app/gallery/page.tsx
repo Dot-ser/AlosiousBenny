@@ -11,13 +11,7 @@ import { Terminal } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
-// Removed: import type { Metadata } from 'next';
 
-// Removed metadata export:
-// export const metadata: Metadata = {
-// title: "Gallery - Alosious Benny",
-// description: "Explore the visual gallery of Alosious Benny.",
-// };
 
 // Example structure of an item from the API
 interface ApiImageItem {
@@ -77,7 +71,7 @@ function SplashScreen({ onFinished }: { onFinished: () => void }) {
       </div>
        <div className="absolute bottom-8 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-2 mx-auto" />
-        <p className="text-lg font-semibold text-foreground">InstaShow Gallery</p>
+        <p className="text-lg font-semibold text-foreground">DOT007 Gallery</p>
         <p className="text-sm text-muted-foreground">Moments unfolding...</p>
       </div>
     </div>
@@ -159,7 +153,7 @@ export default function GalleryPage() {
           </div>
         </main>
          <footer className="text-center p-6 text-sm text-muted-foreground border-t">
-          <p>&copy; {new Date().getFullYear()} InstaShow. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} DOT007. All rights reserved.</p>
         </footer>
       </div>
     );
@@ -195,7 +189,7 @@ export default function GalleryPage() {
         </main>
 
         <footer className="text-center p-6 text-sm text-muted-foreground border-t">
-          <p>&copy; {new Date().getFullYear()} InstaShow. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} DOT007. All rights reserved.</p>
         </footer>
       </div>
       <Toaster />
