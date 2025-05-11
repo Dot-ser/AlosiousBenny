@@ -1,19 +1,18 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { ImageType } from '@/types';
 import { ImageGrid } from '@/components/image-grid';
 import { Toaster } from '@/components/ui/toaster';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Loader2 } from "lucide-react";
+import { Terminal } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-
+// Removed Button as it's no longer needed for load more
 
 const INITIAL_LOAD_LIMIT = 4;
 const LOAD_MORE_LIMIT = 4;
@@ -26,6 +25,9 @@ export default function GalleryPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreImages, setHasMoreImages] = useState(true);
   const { toast } = useToast();
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
 
   const fetchImages = useCallback(async (page: number, limit: number, append: boolean = false) => {
     if (append) {
@@ -70,11 +72,36 @@ export default function GalleryPage() {
     });
   }, [fetchImages]);
 
-  const handleLoadMore = () => {
-    if (hasMoreImages && !isFetchingMore) {
+  const handleLoadMore = useCallback(() => {
+    if (hasMoreImages && !isFetchingMore && !isLoading) {
       fetchImages(currentPage + 1, LOAD_MORE_LIMIT, true);
     }
-  };
+  }, [hasMoreImages, isFetchingMore, isLoading, currentPage, fetchImages]);
+
+  useEffect(() => {
+    if (isLoading) return; // Don't observe while initial load is happening
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          handleLoadMore();
+        }
+      },
+      { threshold: 1.0 } // Trigger when 100% of the element is visible
+    );
+
+    const currentLoaderRef = loadMoreRef.current;
+    if (currentLoaderRef) {
+      observerRef.current.observe(currentLoaderRef);
+    }
+
+    return () => {
+      if (observerRef.current && currentLoaderRef) {
+        observerRef.current.unobserve(currentLoaderRef);
+      }
+    };
+  }, [handleLoadMore, isLoading]);
+
 
   const handleLikeToggle = async (id: string) => {
     const originalImages = [...images];
@@ -95,7 +122,7 @@ export default function GalleryPage() {
          setImages((prevImages) =>
           prevImages.map((img) =>
             img.id === id
-              ? { ...img, likes: result.data!.likes } 
+              ? { ...img, likes: result.data!.likes }
               : img
           )
         );
@@ -106,46 +133,47 @@ export default function GalleryPage() {
       console.error("Failed to toggle like:", e);
     }
   };
-  
+
   const handleShare = async (imageId: string) => {
     const imageToShare = images.find(img => img.id === imageId);
     const caption = imageToShare ? imageToShare.caption : "this cool image";
-  
+
     let shareUrl = `${window.location.origin}/gallery#image-${imageId}`;
-    if (typeof window !== 'undefined' && window.location.host.includes('vercel.app')) {
+     if (typeof window !== 'undefined' && window.location.host) {
        shareUrl = `https://${window.location.host}/gallery#image-${imageId}`;
     }
 
 
     const shareData = {
-      title: `Check out: ${imageToShare ? imageToShare.caption : "DOT007's Gallery Image"}`,
-      text: `I found this cool image "${caption}" in DOT007's Gallery! Check it out:`,
+      title: `Check out: ${imageToShare ? imageToShare.caption : "Alosious Benny's Gallery Image"}`,
+      text: `I found this cool image "${caption}" in Alosious Benny's Gallery! Check it out:`,
       url: shareUrl,
     };
-  
+
     if (navigator.share) {
       try {
         await navigator.share(shareData);
         toast({ title: 'Shared!', description: 'Link to the image shared successfully.' });
-        return; 
+        return;
       } catch (error: any) {
         console.error('Web Share API failed:', error);
         if (error.name === 'AbortError') {
            toast({ title: 'Share Canceled', description: 'Sharing was canceled by the user.' });
-          return; 
+          return;
         }
+         // Fall through to clipboard copy if Web Share API fails for other reasons
       }
     }
-    
-    // Fallback to clipboard if Web Share API is not available or fails
+
+    // Fallback to clipboard
     if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(shareUrl);
-        toast({ 
-          title: 'Link Copied!', 
-          description: navigator.share ? 
-            `Sharing via app failed, but link to "${caption}" copied to clipboard.` : 
-            `Link to "${caption}" copied to clipboard.` 
+        toast({
+          title: 'Link Copied!',
+          description: navigator.share ?
+            `Sharing via app failed, but link to "${caption}" copied to clipboard.` :
+            `Link to "${caption}" copied to clipboard.`
         });
       } catch (error: any) {
         console.error('Clipboard API failed:', error);
@@ -155,7 +183,7 @@ export default function GalleryPage() {
       toast({ variant: 'destructive', title: 'Not Supported', description: 'Your browser does not support sharing or copying to clipboard.' });
     }
   };
-  
+
   return (
     <>
       <div className="min-h-screen bg-background/80 backdrop-blur-sm flex flex-col">
@@ -190,8 +218,12 @@ export default function GalleryPage() {
                 <p>No images found. The gallery is currently empty.</p>
              </div>
           )}
-          
+
           <ImageGrid images={images} onLikeToggle={handleLikeToggle} onShare={handleShare} />
+
+          {/* Loader element for IntersectionObserver */}
+          <div ref={loadMoreRef} style={{ height: '1px', marginTop: '20px' }} />
+
 
           {isFetchingMore && (
             <div className="space-y-8 mt-8">
@@ -201,20 +233,13 @@ export default function GalleryPage() {
             </div>
           )}
 
-          {!isLoading && hasMoreImages && !isFetchingMore && (
-            <div className="text-center mt-8">
-              <Button onClick={handleLoadMore} variant="outline" size="lg">
-                Load More Images
-              </Button>
-            </div>
-          )}
           {!isLoading && !hasMoreImages && images.length > 0 && (
             <p className="text-center text-muted-foreground mt-8">You&apos;ve reached the end of the gallery.</p>
           )}
         </main>
 
         <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60 relative z-10 bg-background/90 backdrop-blur-md">
-          <p>&copy; {new Date().getFullYear()} DOT007&apos;s Gallery. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Alosious Benny&apos;s Gallery. All rights reserved.</p>
         </footer>
       </div>
       <Toaster />
