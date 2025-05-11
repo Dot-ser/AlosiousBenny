@@ -15,9 +15,10 @@ interface ImageCardProps {
   image: ImageType;
   onLikeToggle: (id: string) => void;
   onShare: (id: string) => void;
+  priority?: boolean; // New prop for image priority
 }
 
-export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
+export function ImageCard({ image, onLikeToggle, onShare, priority = false }: ImageCardProps) {
   const [showLikeHeartAnimation, setShowLikeHeartAnimation] = useState(false);
   const lastClickTimeRef = useRef(0);
 
@@ -87,7 +88,7 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
             className="bg-muted"
             data-ai-hint="social media post"
             unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')}
-            priority={image.id === '1'} 
+            priority={priority} // Use the passed priority prop
             onDragStart={(e) => e.preventDefault()}
           />
           {showLikeHeartAnimation && (
@@ -108,7 +109,7 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
             <Heart
               className={cn(
                 "w-6 h-6 transition-all transform active:scale-90",
-                image.liked ? 'text-red-500 fill-red-500' : 'text-foreground/80' // Changed to red-500 for liked state
+                image.liked ? 'text-red-500 fill-red-500' : 'text-foreground/80' 
               )}
             />
             <span className="sr-only">Like</span>

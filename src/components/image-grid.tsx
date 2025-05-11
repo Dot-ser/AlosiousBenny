@@ -5,7 +5,7 @@ import { ImageCard } from './image-card';
 interface ImageGridProps {
   images: ImageType[];
   onLikeToggle: (id: string) => void;
-  onShare: (id: string) => void; // Changed from (src: string) to (id: string)
+  onShare: (id: string) => void; 
 }
 
 export function ImageGrid({ images, onLikeToggle, onShare }: ImageGridProps) {
@@ -19,9 +19,16 @@ export function ImageGrid({ images, onLikeToggle, onShare }: ImageGridProps) {
 
   return (
     <div className="space-y-8">
-      {images.map((image) => (
-        <ImageCard key={image.id} image={image} onLikeToggle={onLikeToggle} onShare={onShare} />
+      {images.map((image, index) => (
+        <ImageCard 
+          key={image.id} 
+          image={image} 
+          onLikeToggle={onLikeToggle} 
+          onShare={onShare} 
+          priority={index === 0} // Prioritize the first image
+        />
       ))}
     </div>
   );
 }
+
