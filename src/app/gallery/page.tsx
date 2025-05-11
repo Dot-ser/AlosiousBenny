@@ -12,7 +12,7 @@ import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
-// Removed Button as it's no longer needed for load more
+
 
 const INITIAL_LOAD_LIMIT = 4;
 const LOAD_MORE_LIMIT = 4;
@@ -39,7 +39,17 @@ export default function GalleryPage() {
 
     try {
       const result = await getImagesAction(page, limit);
-      setImages(prevImages => append ? [...prevImages, ...result.images] : result.images);
+      setImages(prevImages => {
+        if (append) {
+          // Create a Set of existing image IDs for quick lookup
+          const existingImageIds = new Set(prevImages.map(img => img.id));
+          // Filter out new images that are already present to prevent duplicate keys
+          const newUniqueImages = result.images.filter(img => !existingImageIds.has(img.id));
+          return [...prevImages, ...newUniqueImages];
+        } else {
+          return result.images;
+        }
+      });
       setHasMoreImages(result.hasMore);
       setCurrentPage(page);
     } catch (e) {
@@ -79,28 +89,30 @@ export default function GalleryPage() {
   }, [hasMoreImages, isFetchingMore, isLoading, currentPage, fetchImages]);
 
   useEffect(() => {
-    if (isLoading) return; // Don't observe while initial load is happening
+    if (isLoading) return; 
 
-    observerRef.current = new IntersectionObserver(
+    const currentObserver = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && hasMoreImages && !isFetchingMore) {
           handleLoadMore();
         }
       },
-      { threshold: 1.0 } // Trigger when 100% of the element is visible
+      { threshold: 1.0 } 
     );
+    observerRef.current = currentObserver;
+
 
     const currentLoaderRef = loadMoreRef.current;
     if (currentLoaderRef) {
-      observerRef.current.observe(currentLoaderRef);
+      currentObserver.observe(currentLoaderRef);
     }
 
     return () => {
-      if (observerRef.current && currentLoaderRef) {
-        observerRef.current.unobserve(currentLoaderRef);
+      if (currentObserver && currentLoaderRef) {
+        currentObserver.unobserve(currentLoaderRef);
       }
     };
-  }, [handleLoadMore, isLoading]);
+  }, [handleLoadMore, isLoading, hasMoreImages, isFetchingMore]);
 
 
   const handleLikeToggle = async (id: string) => {
@@ -161,11 +173,9 @@ export default function GalleryPage() {
            toast({ title: 'Share Canceled', description: 'Sharing was canceled by the user.' });
           return;
         }
-         // Fall through to clipboard copy if Web Share API fails for other reasons
       }
     }
 
-    // Fallback to clipboard
     if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(shareUrl);
@@ -220,9 +230,8 @@ export default function GalleryPage() {
           )}
 
           <ImageGrid images={images} onLikeToggle={handleLikeToggle} onShare={handleShare} />
-
-          {/* Loader element for IntersectionObserver */}
-          <div ref={loadMoreRef} style={{ height: '1px', marginTop: '20px' }} />
+          
+          <div ref={loadMoreRef} style={{ height: '10px', marginTop: '20px' }} />
 
 
           {isFetchingMore && (
@@ -246,3 +255,4 @@ export default function GalleryPage() {
     </>
   );
 }
+
