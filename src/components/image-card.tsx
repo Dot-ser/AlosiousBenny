@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 interface ImageCardProps {
   image: ImageType;
   onLikeToggle: (id: string) => void;
-  onShare: (id: string) => void; // Changed from (src: string) to (id: string)
+  onShare: (id: string) => void;
 }
 
 export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
@@ -19,7 +19,7 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
   };
 
   const handleShareClick = () => {
-    onShare(image.id); // Pass image.id instead of image.src
+    onShare(image.id);
   };
 
   return (
@@ -27,7 +27,7 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
       <CardHeader className="flex flex-row items-center justify-between p-3 border-b">
         <div className="flex items-center space-x-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={image.user.avatarUrl} alt={image.user.name} data-ai-hint="profile picture user" />
+            <AvatarImage src={image.user.avatarUrl || '/images/logo.jpg'} alt={image.user.name} data-ai-hint="profile picture user" />
             <AvatarFallback>{image.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <span className="font-semibold text-sm">{image.user.name}</span>
@@ -39,13 +39,18 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
       </CardHeader>
 
       <CardContent className="p-0 select-none pointer-events-none" onContextMenu={(e) => e.preventDefault()}>
+        {/* The container div with aspect-square ensures the image area is square.
+            next/image with fill and objectFit="cover" will make the image cover this square area,
+            maintaining its aspect ratio by cropping if necessary.
+        */}
         <div className="aspect-square w-full relative">
            <Image
             src={image.src}
             alt={image.alt}
             fill 
-            objectFit="cover" 
-            className="bg-muted object-cover" 
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Example sizes, adjust as needed for responsiveness
+            objectFit="cover" // Ensures the image covers the container, cropping if necessary
+            className="bg-muted" // Removed object-cover from here as objectFit prop handles it
             data-ai-hint="social media post"
             unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')}
             priority={image.id === '1'} 

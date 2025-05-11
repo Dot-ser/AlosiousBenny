@@ -8,9 +8,6 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
 import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-
-const ModelViewer = dynamic(() => import('@/components/model-viewer'), { ssr: false });
 
 
 interface SocialLinkProps {
@@ -89,7 +86,7 @@ export default function HomePage() {
       <main className="flex-grow container mx-auto px-4 py-12 sm:py-16 md:py-20 flex flex-col items-center text-center z-10">
         <div className="mb-8">
           <Image
-            src="/logo.jpg" // Changed to absolute path from public
+            src="/images/logo.jpg"
             alt="Alosious Benny"
             width={160}
             height={160}
@@ -108,14 +105,6 @@ export default function HomePage() {
             <DetailItem key={detail.label} icon={detail.icon} label={detail.label} value={detail.value} />
           ))}
         </div>
-
-        {/* 3D Model Viewer */}
-        {isClient && (
-          <div className="w-full max-w-xl h-64 md:h-96 mb-10 rounded-lg overflow-hidden shadow-2xl border border-border/30 bg-card/50">
-            <ModelViewer />
-          </div>
-        )}
-
 
         {/* Hobbies/Interests Section */}
         <div className="max-w-2xl w-full mb-10 text-left px-4 sm:px-6">
@@ -169,4 +158,3 @@ export default function HomePage() {
     </div>
   );
 }
-

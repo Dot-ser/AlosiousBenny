@@ -58,10 +58,10 @@ export async function getAdminUser() {
   // await dbConnect();
   // const adminUserDoc = await User.findOne({ username: ADMIN_USERNAME });
   // if (adminUserDoc) {
-  //   return { name: adminUserDoc.username, avatarUrl: adminUserDoc.avatarUrl || `https://i.pravatar.cc/150?u=${ADMIN_USERNAME}` };
+  //   return { name: adminUserDoc.username, avatarUrl: adminUserDoc.avatarUrl || `/images/logo.jpg` };
   // }
   return {
     name: ADMIN_USERNAME,
-    avatarUrl: `https://i.pravatar.cc/150?u=${ADMIN_USERNAME}`, // Placeholder avatar
+    avatarUrl: `/images/logo.jpg`, // Placeholder avatar
   };
 }
