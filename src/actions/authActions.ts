@@ -62,6 +62,6 @@ export async function getAdminUser() {
   // }
   return {
     name: ADMIN_USERNAME,
-    avatarUrl: `/images/logo.jpg`, // Placeholder avatar
+    avatarUrl: `/images/logo.jpg`,
   };
 }
