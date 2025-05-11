@@ -12,7 +12,7 @@ import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
-import ParticleBackground from '@/components/particle-background'; 
+// Removed: import ParticleBackground from '@/components/particle-background'; 
 
 
 export default function GalleryPage() {
@@ -107,10 +107,7 @@ export default function GalleryPage() {
         return;
       } catch (error: any) {
         console.error('Web Share API failed:', error);
-        // For AbortError (user cancelled), we just return.
-        // For other errors (like Permission Denied), we fall through to clipboard.
         if (error.name === 'AbortError') {
-          // toast({ title: 'Sharing Cancelled', description: 'You cancelled the share action.'});
           return;
         }
       }
@@ -137,7 +134,7 @@ export default function GalleryPage() {
   return (
     <>
       <div className="min-h-screen bg-background/80 backdrop-blur-sm flex flex-col">
-        <ParticleBackground />
+        {/* Removed: <ParticleBackground /> */}
         <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Logo />
