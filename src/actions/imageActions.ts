@@ -1,4 +1,3 @@
-
 'use server';
 
 import dbConnect from '@/lib/mongodb';
@@ -35,7 +34,8 @@ function mapMongoImageToImageType(mongoImage: IImage): ImageType {
       name: mongoImage.user.name,
       avatarUrl: mongoImage.user.avatarUrl || `https://i.pravatar.cc/150?u=${mongoImage.user.name}`,
     },
-    timestamp: new Date(mongoImage.timestamp).toLocaleUpperCase(), // Format as needed
+    // Kept original timestamp formatting, can be changed if needed e.g. toISOString()
+    timestamp: new Date(mongoImage.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toLocaleUpperCase(), 
   };
 }
 
@@ -48,12 +48,12 @@ export async function addImageAction(input: AddImageInput): Promise<ActionResult
 
   try {
     await dbConnect();
-    const adminUser = await getAdminUser(); // Get current admin user details
+    const adminUser = await getAdminUser(); 
 
     const newImage = new ImageModel({
       ...input,
-      alt: input.alt || input.caption, // Default alt text to caption if not provided
-      user: { // Embed admin user info
+      alt: input.alt || input.caption, 
+      user: { 
         name: adminUser.name,
         avatarUrl: adminUser.avatarUrl,
       },
@@ -63,8 +63,8 @@ export async function addImageAction(input: AddImageInput): Promise<ActionResult
     const savedImage = await newImage.save();
     return { success: true, image: mapMongoImageToImageType(savedImage) };
   } catch (error: any) {
-    console.error('Error adding image:', error);
-    return { success: false, error: error.message || 'Failed to add image to database.' };
+    console.error('Detailed error adding image:', error); // Log the full error object
+    return { success: false, error: error.message || 'Failed to add image to database. Check server logs for details.' };
   }
 }
 
@@ -82,13 +82,12 @@ export async function getImagesAction(): Promise<ImageType[]> {
 export async function getImagesAdminAction(): Promise<ImageType[]> {
    const authenticated = await isAuthenticated();
    if (!authenticated) {
-    // Or throw an error, or return empty array with status
     console.warn('Unauthorized attempt to fetch admin images');
     return []; 
   }
   try {
     await dbConnect();
-    const images = await ImageModel.find().sort({ createdAt: -1 }).lean(); // Sort by creation time
+    const images = await ImageModel.find().sort({ createdAt: -1 }).lean(); 
     return images.map(imageDoc => mapMongoImageToImageType(imageDoc as IImage));
   } catch (error) {
     console.error('Error fetching images for admin:', error);
@@ -98,37 +97,17 @@ export async function getImagesAdminAction(): Promise<ImageType[]> {
 
 
 export async function toggleLikeAction(imageId: string): Promise<ActionResult<{ likes: number }>> {
-  // Note: User-specific 'liked' status is not handled here without gallery user auth.
-  // This action just increments/decrements the global like count.
   try {
     await dbConnect();
     const image = await ImageModel.findById(imageId);
     if (!image) {
       return { success: false, error: 'Image not found.' };
     }
-
-    // For simplicity, let's assume we are just toggling a global like count.
-    // A real "like" system would check if a *specific user* has already liked it.
-    // Here, we'll just increment. If you want to allow unliking, you'd need more logic.
-    // Let's simulate a toggle: if a 'liked' field was on the image for the current interaction.
-    // Since we don't have that, this will always increment.
-    // To make it a real toggle for a public page, you'd need client-side state and potentially local storage
-    // or pass a parameter like `isLikedCurrentlyByClient`.
-    // For now, let's just increment likes.
     
-    // A more realistic scenario if we could track if the "current anonymous session" liked it:
-    // This is a simplified example. A real app would need user accounts for gallery viewers.
-    // We'll just increment the like count.
-    image.likes = (image.likes || 0) + 1; // Simple increment
-    
-    // If you wanted to truly toggle and had some way to know if this "user" previously liked:
-    // const currentlyLikedByClient = ???; // This is the missing piece without user auth
-    // if (currentlyLikedByClient) {
-    //   image.likes = Math.max(0, (image.likes || 0) - 1);
-    // } else {
-    //   image.likes = (image.likes || 0) + 1;
-    // }
-    
+    // This is a simplified like toggle for anonymous users, effectively just incrementing.
+    // A real system would track user-specific likes.
+    image.likes = (image.likes || 0) + 1; 
+        
     await image.save();
     return { success: true, image: { likes: image.likes } };
   } catch (error: any) {
@@ -136,3 +115,46 @@ export async function toggleLikeAction(imageId: string): Promise<ActionResult<{ 
     return { success: false, error: error.message || 'Failed to update like status.' };
   }
 }
+
+// Basic function to seed database if empty (for testing/initial setup)
+// Not automatically run, needs to be called manually if desired (e.g. via a protected API route or script)
+export async function seedDatabase() {
+  await dbConnect();
+  const imageCount = await ImageModel.countDocuments();
+  if (imageCount === 0) {
+    console.log('No images found, seeding database...');
+    const admin = await getAdminUser(); // Use the admin user from .env for seeding
+
+    const seedImages = [
+      {
+        src: "https://files.catbox.moe/weul01.jpg",
+        alt: "Narvent - Fainted album art",
+        caption: "Narvent - Fainted",
+        hashtags: ["Gudd", "nice", "music"],
+        user: { name: admin.name, avatarUrl: admin.avatarUrl },
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
+      },
+      {
+        src: "https://files.catbox.moe/k23ytz.jpg",
+        alt: "K-391 & Alan Walker - Ignite album art",
+        caption: "K-391 & Alan Walker - Ignite (feat. Julie Bergan & Seungri)",
+        hashtags: ["nice", "edm", "walker"],
+        user: { name: admin.name, avatarUrl: admin.avatarUrl },
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), // 1 day ago
+      }
+    ];
+
+    for (const imgData of seedImages) {
+        const image = new ImageModel(imgData);
+        await image.save();
+    }
+    console.log('Database seeded with initial images.');
+  } else {
+    console.log('Database already contains images, skipping seed.');
+  }
+}
+
+// Example of how you might call seed (e.g. in a dev script or one-off admin action)
+// if (process.env.NODE_ENV === 'development') {
+//   seedDatabase().catch(console.error);
+// }

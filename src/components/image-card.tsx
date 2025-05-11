@@ -1,4 +1,3 @@
-
 import type { ImageType } from '@/types';
 import Image from 'next/image';
 import { Heart, MessageCircle, Send, MoreHorizontal } from 'lucide-react';
@@ -10,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 interface ImageCardProps {
   image: ImageType;
   onLikeToggle: (id: string) => void;
-  onShare: (src: string) => void; // Added onShare prop
+  onShare: (src: string) => void;
 }
 
 export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
@@ -43,13 +42,13 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
            <Image
             src={image.src}
             alt={image.alt}
-            layout="fill"
-            objectFit="cover"
-            className="bg-muted"
+            fill // Changed from layout="fill"
+            objectFit="cover" // Retained objectFit, works with fill
+            className="bg-muted object-cover" // Added object-cover here as well for clarity
             data-ai-hint="social media post"
-            unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')} // Unoptimize data URIs and catbox
-            priority={image.id === '1'} // Example: Prioritize the first image
-            onDragStart={(e) => e.preventDefault()} // Prevent dragging
+            unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')}
+            priority={image.id === '1'} 
+            onDragStart={(e) => e.preventDefault()}
           />
         </div>
       </CardContent>

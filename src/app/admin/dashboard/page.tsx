@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -105,14 +104,14 @@ export default function AdminDashboardPage() {
         setImagePreview(null);
         setAltText('');
         const fileInput = document.getElementById('imageFile') as HTMLInputElement;
-        if (fileInput) fileInput.value = ''; // Reset file input
-        fetchUploadedImages();
+        if (fileInput) fileInput.value = ''; 
+        fetchUploadedImages(); // Refresh the list of uploaded images
       } else {
-        toast({ variant: 'destructive', title: 'Failed to Add Image', description: result.error || 'An unknown error occurred.' });
+        toast({ variant: 'destructive', title: 'Failed to Add Image', description: result.error || 'An unknown error occurred. Check server logs for details.' });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error processing or uploading image:", error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process or upload the image.' });
+      toast({ variant: 'destructive', title: 'Error', description: error.message || 'Could not process or upload the image.' });
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +158,7 @@ export default function AdminDashboardPage() {
                       height={100} 
                       className="rounded object-cover" 
                       data-ai-hint="image preview"
-                      unoptimized={true} // Data URIs don't need optimization
+                      unoptimized // Data URIs should be unoptimized
                     />
                   </div>
                 )}
@@ -227,7 +226,7 @@ export default function AdminDashboardPage() {
                         width={50}
                         height={50}
                         className="rounded object-cover"
-                        unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')} // Unoptimize data URIs and catbox
+                        unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')} 
                         data-ai-hint="gallery thumbnail"
                         />
                       <span className="truncate font-medium" title={image.caption}>{image.caption.length > 30 ? `${image.caption.substring(0,27)}...` : image.caption}</span>
