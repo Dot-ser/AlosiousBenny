@@ -1,3 +1,4 @@
+
 import type { ImageType } from '@/types';
 import Image from 'next/image';
 import { Heart, MessageCircle, Send, MoreHorizontal } from 'lucide-react';
@@ -9,11 +10,16 @@ import { Badge } from '@/components/ui/badge';
 interface ImageCardProps {
   image: ImageType;
   onLikeToggle: (id: string) => void;
+  onShare: (src: string) => void; // Added onShare prop
 }
 
-export function ImageCard({ image, onLikeToggle }: ImageCardProps) {
+export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
   const handleLikeClick = () => {
     onLikeToggle(image.id);
+  };
+
+  const handleShareClick = () => {
+    onShare(image.src);
   };
 
   return (
@@ -32,7 +38,7 @@ export function ImageCard({ image, onLikeToggle }: ImageCardProps) {
         </Button>
       </CardHeader>
 
-      <CardContent className="p-0">
+      <CardContent className="p-0 select-none pointer-events-none" onContextMenu={(e) => e.preventDefault()}>
         <div className="aspect-square w-full relative">
            <Image
             src={image.src}
@@ -41,7 +47,9 @@ export function ImageCard({ image, onLikeToggle }: ImageCardProps) {
             objectFit="cover"
             className="bg-muted"
             data-ai-hint="social media post"
-            unoptimized={image.src.startsWith('https://files.catbox.moe')} // Bypass optimization for catbox.moe if needed
+            unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')} // Unoptimize data URIs and catbox
+            priority={image.id === '1'} // Example: Prioritize the first image
+            onDragStart={(e) => e.preventDefault()} // Prevent dragging
           />
         </div>
       </CardContent>
@@ -60,7 +68,7 @@ export function ImageCard({ image, onLikeToggle }: ImageCardProps) {
             <MessageCircle className="w-6 h-6 text-foreground/80" />
             <span className="sr-only">Comment</span>
           </Button>
-          <Button variant="ghost" size="icon" className="p-0 h-auto">
+          <Button variant="ghost" size="icon" onClick={handleShareClick} className="p-0 h-auto">
             <Send className="w-6 h-6 text-foreground/80" />
             <span className="sr-only">Share</span>
           </Button>
