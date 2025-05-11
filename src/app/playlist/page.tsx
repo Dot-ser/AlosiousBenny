@@ -34,7 +34,7 @@ export default function PlaylistPage() {
       
       <header>
         <i id="menuToggle" className="fa fa-bars"></i>
-        <h1>Song<span>4u</span></h1>
+        <h1>Play<span>list</span></h1>
       </header>
 
       <div id="songList" className="song-list hidden"></div>

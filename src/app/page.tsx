@@ -7,7 +7,11 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
 import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic } from 'lucide-react';
-// Removed: import ParticleBackground from '@/components/particle-background';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const ModelViewer = dynamic(() => import('@/components/model-viewer'), { ssr: false });
+
 
 interface SocialLinkProps {
   href: string;
@@ -42,6 +46,12 @@ const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, value }) => 
 
 
 export default function HomePage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const socialLinks: SocialLinkProps[] = [
     { href: "http://instagram.com/_alosious_benny", label: "Instagram", icon: Instagram },
     { href: "https://www.linkedin.com/in/alosious-benny-a04bba30a", label: "LinkedIn", icon: Linkedin },
@@ -67,7 +77,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
-      {/* <ParticleBackground /> */}
       <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Logo />
@@ -80,7 +89,7 @@ export default function HomePage() {
       <main className="flex-grow container mx-auto px-4 py-12 sm:py-16 md:py-20 flex flex-col items-center text-center z-10">
         <div className="mb-8">
           <Image
-            src="https://files.catbox.moe/k23ytz.jpg"
+            src="/logo.jpg" // Changed to absolute path from public
             alt="Alosious Benny"
             width={160}
             height={160}
@@ -100,6 +109,14 @@ export default function HomePage() {
           ))}
         </div>
 
+        {/* 3D Model Viewer */}
+        {isClient && (
+          <div className="w-full max-w-xl h-64 md:h-96 mb-10 rounded-lg overflow-hidden shadow-2xl border border-border/30 bg-card/50">
+            <ModelViewer />
+          </div>
+        )}
+
+
         {/* Hobbies/Interests Section */}
         <div className="max-w-2xl w-full mb-10 text-left px-4 sm:px-6">
           <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-center text-foreground flex items-center justify-center gap-2">
@@ -109,7 +126,7 @@ export default function HomePage() {
           <ul className="list-none space-y-3 text-muted-foreground">
             {hobbies.map((hobby, index) => (
               <li key={index} className="flex items-start p-3 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                <span className="text-primary mr-3 mt-1">&#10003;</span> {/* Checkmark or other icon */}
+                <span className="text-primary mr-3 mt-1">&#10003;</span> 
                 <span className="text-lg">{hobby}</span>
               </li>
             ))}
@@ -128,7 +145,7 @@ export default function HomePage() {
             </a>
           </Button>
           <Button asChild size="lg" variant="secondary" className="px-8 py-6 text-lg shadow-lg hover:shadow-muted-foreground/30 transition-all duration-300 transform hover:scale-105">
-            <a href="https://alosiousbenny.vercel.app/Playlist" target="_blank" rel="noopener noreferrer">
+            <a href="/playlist" target="_blank" rel="noopener noreferrer">
               My Playlist <ListMusic size={20} className="ml-2" />
             </a>
           </Button>
@@ -152,3 +169,4 @@ export default function HomePage() {
     </div>
   );
 }
+
