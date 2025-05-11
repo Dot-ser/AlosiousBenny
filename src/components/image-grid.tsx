@@ -5,7 +5,7 @@ import { ImageCard } from './image-card';
 interface ImageGridProps {
   images: ImageType[];
   onLikeToggle: (id: string) => void;
-  onShare: (src: string) => void; // Added onShare prop
+  onShare: (id: string) => void; // Changed from (src: string) to (id: string)
 }
 
 export function ImageGrid({ images, onLikeToggle, onShare }: ImageGridProps) {

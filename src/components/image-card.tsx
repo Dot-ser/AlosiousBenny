@@ -1,3 +1,4 @@
+
 import type { ImageType } from '@/types';
 import Image from 'next/image';
 import { Heart, MessageCircle, Send, MoreHorizontal } from 'lucide-react';
@@ -9,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 interface ImageCardProps {
   image: ImageType;
   onLikeToggle: (id: string) => void;
-  onShare: (src: string) => void;
+  onShare: (id: string) => void; // Changed from (src: string) to (id: string)
 }
 
 export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
@@ -18,11 +19,11 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
   };
 
   const handleShareClick = () => {
-    onShare(image.src);
+    onShare(image.id); // Pass image.id instead of image.src
   };
 
   return (
-    <Card className="w-full max-w-xl mx-auto shadow-lg rounded-xl overflow-hidden">
+    <Card id={`image-card-${image.id}`} className="w-full max-w-xl mx-auto shadow-lg rounded-xl overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between p-3 border-b">
         <div className="flex items-center space-x-3">
           <Avatar className="h-8 w-8">
@@ -42,9 +43,9 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
            <Image
             src={image.src}
             alt={image.alt}
-            fill // Changed from layout="fill"
-            objectFit="cover" // Retained objectFit, works with fill
-            className="bg-muted object-cover" // Added object-cover here as well for clarity
+            fill 
+            objectFit="cover" 
+            className="bg-muted object-cover" 
             data-ai-hint="social media post"
             unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')}
             priority={image.id === '1'} 

@@ -25,8 +25,6 @@ export default function GalleryPage() {
     setIsLoading(true);
     setError(null);
     try {
-      // Simulate API delay for skeleton
-      // await new Promise(resolve => setTimeout(resolve, 1500)); 
       const loadedImages = await getImagesAction();
       setImages(loadedImages);
     } catch (e) {
@@ -40,7 +38,21 @@ export default function GalleryPage() {
   }, [toast]);
 
   useEffect(() => {
-    fetchImages();
+    fetchImages().then(() => {
+      // After images are fetched and set, check for hash and scroll
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const imageIdFromHash = window.location.hash.replace('#image-', '');
+        if (imageIdFromHash) {
+          // Timeout to allow DOM to update with images
+          setTimeout(() => {
+            const element = document.getElementById(`image-card-${imageIdFromHash}`);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 100); // Small delay might be needed
+        }
+      }
+    });
   }, [fetchImages]);
 
 
@@ -75,44 +87,49 @@ export default function GalleryPage() {
     }
   };
 
-  const handleShare = async (imageSrc: string) => {
+  const handleShare = async (imageId: string) => {
+    const imageToShare = images.find(img => img.id === imageId);
+    const caption = imageToShare ? imageToShare.caption : "this cool image";
+  
     const currentUrl = new URL(window.location.href);
-    const shareUrl = `${currentUrl.protocol}//${currentUrl.host}/gallery`;
+    const shareUrl = `${currentUrl.protocol}//${currentUrl.host}/gallery#image-${imageId}`;
+  
     const shareData = {
-      title: "Check out this image from Alosious Benny's Gallery!",
-      text: 'I found this cool image in the gallery.',
+      title: `Check out: ${imageToShare ? imageToShare.caption : "DOT007 Gallery Image"}`,
+      text: `I found this cool image "${imageToShare ? imageToShare.caption : 'an image'}" in DOT007's Gallery! Check it out:`,
       url: shareUrl,
     };
   
-    // Attempt to use Web Share API
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-        toast({ title: 'Shared!', description: 'Gallery link shared successfully.' });
-        return; // Success, exit
+        toast({ title: 'Shared!', description: 'Link to the image shared successfully.' });
+        return;
       } catch (error: any) {
         console.error('Web Share API failed:', error);
+        // For AbortError (user cancelled), we just return.
+        // For other errors (like Permission Denied), we fall through to clipboard.
         if (error.name === 'AbortError') {
-          // User cancelled the share dialog
-          console.log('Sharing aborted by user.');
-          // Optionally, show a toast: toast({ title: 'Sharing Cancelled' });
-          return; // Exit, as this is not a "failure" to fallback from necessarily
+          // toast({ title: 'Sharing Cancelled', description: 'You cancelled the share action.'});
+          return;
         }
-        // If Web Share API failed for other reasons (e.g., Permission Denied), proceed to clipboard fallback
       }
     }
   
-    // Fallback to Clipboard API
     if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(shareUrl);
-        toast({ title: 'Link Copied!', description: (navigator.share ? 'Sharing failed, but link copied.' : 'Link copied to clipboard.') });
+        toast({ 
+          title: 'Link Copied!', 
+          description: navigator.share ? 
+            `Sharing via app failed, but link to "${caption}" copied to clipboard.` : 
+            `Link to "${caption}" copied to clipboard.` 
+        });
       } catch (error: any) {
         console.error('Clipboard API failed:', error);
         toast({ variant: 'destructive', title: 'Operation Failed', description: 'Could not share or copy the link. Please try copying manually.' });
       }
     } else {
-      // Neither API is available
       toast({ variant: 'destructive', title: 'Not Supported', description: 'Your browser does not support sharing or copying to clipboard.' });
     }
   };
@@ -158,7 +175,7 @@ export default function GalleryPage() {
         </main>
 
         <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60 relative z-10 bg-background/90 backdrop-blur-md">
-          <p>&copy; {new Date().getFullYear()} Alosious Benny&apos;s Gallery. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} DOT007&apos;s Gallery. All rights reserved.</p>
         </footer>
       </div>
       <Toaster />
