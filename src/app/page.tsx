@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
 import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic } from 'lucide-react';
+// Removed: import ParticleBackground from '@/components/particle-background';
 
 interface SocialLinkProps {
   href: string;
@@ -52,7 +54,7 @@ export default function HomePage() {
   const personalDetails: DetailItemProps[] = [
     { icon: User, label: "Age", value: "20" },
     { icon: MapPin, label: "Location", value: "Idukki, Kerala" },
-
+    { icon: Briefcase, label: "Studying", value: "Cyber Forensic Student" },
   ];
 
   const hobbies = [
@@ -64,7 +66,8 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
+      {/* <ParticleBackground /> */}
       <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Logo />
@@ -74,10 +77,10 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="flex-grow container mx-auto px-4 py-12 sm:py-16 md:py-20 flex flex-col items-center text-center">
+      <main className="flex-grow container mx-auto px-4 py-12 sm:py-16 md:py-20 flex flex-col items-center text-center z-10">
         <div className="mb-8">
           <Image
-            src="https://files.catbox.moe/k23ytz.jpg" 
+            src="https://files.catbox.moe/k23ytz.jpg"
             alt="Alosious Benny"
             width={160}
             height={160}
@@ -143,10 +146,9 @@ export default function HomePage() {
         </div>
       </main>
 
-      <footer className="text-center p-8 text-sm text-muted-foreground border-t border-border/60">
+      <footer className="text-center p-8 text-sm text-muted-foreground border-t border-border/60 z-10">
         <p>&copy; {new Date().getFullYear()} Alosious Benny. All rights reserved.</p>
       </footer>
     </div>
   );
 }
-
