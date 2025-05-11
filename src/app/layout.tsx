@@ -1,7 +1,6 @@
 
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
-// import { GeistMono } from 'geist/font/mono'; // Removed as it was causing an error and not used
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"; 
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -18,6 +17,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={GeistSans.variable} suppressHydrationWarning>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
+      </head>
       <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
@@ -33,3 +41,4 @@ export default function RootLayout({
     </html>
   );
 }
+

@@ -1,7 +1,7 @@
+
 'use client';
 
 import { useEffect } from 'react';
-import Head from 'next/head';
 import './style.css'; // Styles specific to this page
 
 export default function PlaylistPage() {
@@ -17,8 +17,8 @@ export default function PlaylistPage() {
       // Optional: cleanup script on component unmount
       return () => {
         const existingScript = document.querySelector('script[src="/script-bundle.js"]');
-        if (existingScript) {
-          document.body.removeChild(existingScript);
+        if (existingScript && existingScript.parentNode) {
+          existingScript.parentNode.removeChild(existingScript);
         }
       };
     }
@@ -26,29 +26,11 @@ export default function PlaylistPage() {
 
   return (
     <>
-      <Head>
-        <title>Song4u - Playlist</title>
-        <meta name="description" content="Song4u - listen to My Favorite Songs" />
-        <meta name="keywords" content="Song4u, Music, Player, Web App, Playlist" />
-        <meta name="author" content="DOT007" />
-        <meta name="theme-color" content="#000000" />
-        <meta property="og:title" content="Favorite Playlist" />
-        <meta property="og:description" content="Song4u - listen to My Favorite Songs" />
-        <meta property="og:url" content="https://alosiousbenny.vercel.app/Playlist" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://files.catbox.moe/jkwu5t.jpg" />
-        <meta name="twitter:image" content="https://files.catbox.moe/jkwu5t.jpg" />
-        <link rel="icon" href="https://files.catbox.moe/4tr6ip.jpg" type="image/x-icon" />
-        {/* It's generally better to load external CSS like Font Awesome via npm package if possible,
-            or ensure it's truly necessary and a reliable CDN. For now, keeping as is. */}
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-          integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-        />
-      </Head>
+      {/* Meta tags and title are better handled by generateMetadata in layout or server components,
+          or by directly modifying document.title if needed in a client component for dynamic titles.
+          For now, we rely on the global layout for main meta tags and title.
+          Font Awesome is now loaded globally from layout.tsx.
+      */}
       
       <header>
         <i id="menuToggle" className="fa fa-bars"></i>
@@ -84,9 +66,8 @@ export default function PlaylistPage() {
       </div>
 
       <footer>
-        <p>&copy; {new Date().getFullYear()} <a href="https://alosious-benny.vercel.app">Alosious Benny</a></p>
+        <p>&copy; {new Date().getFullYear()} <a href="https://alosiousbenny.vercel.app">Alosious Benny</a></p>
       </footer>
     </>
   );
 }
-
