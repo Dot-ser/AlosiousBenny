@@ -6,7 +6,7 @@ export function Logo() {
   return (
     <Link href="/" className="flex items-center space-x-2 group" aria-label="DOT007 Home">
       <Image 
-        src="https://files.catbox.moe/k23ytz.jpg" 
+        src="/logo.jpg" 
         alt="DOT007 Logo" 
         width={32} 
         height={32} 
@@ -19,3 +19,4 @@ export function Logo() {
     </Link>
   );
 }
+
