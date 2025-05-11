@@ -12,7 +12,8 @@ import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
-import ParticleBackground from '../../components/particle-background'; 
+import ParticleBackground from '@/components/particle-background'; 
+
 
 export default function GalleryPage() {
   const [images, setImages] = useState<ImageType[]>([]);
@@ -75,26 +76,44 @@ export default function GalleryPage() {
   };
 
   const handleShare = async (imageSrc: string) => {
-    try {
-      const currentUrl = new URL(window.location.href);
-      // Use a clean URL for sharing, for example the base gallery URL
-      const shareUrl = `${currentUrl.protocol}//${currentUrl.host}/gallery`;
-
-      if (navigator.share) {
-        await navigator.share({
-          title: 'Check out this image from Alosious Benny\'s Gallery!',
-          text: 'I found this cool image in the gallery.',
-          url: shareUrl, 
-        });
+    const currentUrl = new URL(window.location.href);
+    const shareUrl = `${currentUrl.protocol}//${currentUrl.host}/gallery`;
+    const shareData = {
+      title: "Check out this image from Alosious Benny's Gallery!",
+      text: 'I found this cool image in the gallery.',
+      url: shareUrl,
+    };
+  
+    // Attempt to use Web Share API
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
         toast({ title: 'Shared!', description: 'Gallery link shared successfully.' });
-      } else {
-        // Fallback for browsers that don't support Web Share API
-        await navigator.clipboard.writeText(shareUrl);
-        toast({ title: 'Link Copied!', description: 'Gallery link copied to clipboard.' });
+        return; // Success, exit
+      } catch (error: any) {
+        console.error('Web Share API failed:', error);
+        if (error.name === 'AbortError') {
+          // User cancelled the share dialog
+          console.log('Sharing aborted by user.');
+          // Optionally, show a toast: toast({ title: 'Sharing Cancelled' });
+          return; // Exit, as this is not a "failure" to fallback from necessarily
+        }
+        // If Web Share API failed for other reasons (e.g., Permission Denied), proceed to clipboard fallback
       }
-    } catch (error) {
-      console.error('Error sharing:', error);
-      toast({ variant: 'destructive', title: 'Sharing Failed', description: 'Could not share the gallery link.' });
+    }
+  
+    // Fallback to Clipboard API
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast({ title: 'Link Copied!', description: (navigator.share ? 'Sharing failed, but link copied.' : 'Link copied to clipboard.') });
+      } catch (error: any) {
+        console.error('Clipboard API failed:', error);
+        toast({ variant: 'destructive', title: 'Operation Failed', description: 'Could not share or copy the link. Please try copying manually.' });
+      }
+    } else {
+      // Neither API is available
+      toast({ variant: 'destructive', title: 'Not Supported', description: 'Your browser does not support sharing or copying to clipboard.' });
     }
   };
   
