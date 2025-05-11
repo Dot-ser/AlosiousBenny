@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -6,13 +5,13 @@ import type { ImageType } from '@/types';
 import { ImageGrid } from '@/components/image-grid';
 import { Toaster } from '@/components/ui/toaster';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Terminal, Share2 } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
-import ParticleBackground from '@/components/particle-background';
+import ParticleBackground from '../../components/particle-background'; // Changed to relative path
 
 
 export default function GalleryPage() {
@@ -25,6 +24,8 @@ export default function GalleryPage() {
     setIsLoading(true);
     setError(null);
     try {
+      // Simulate API delay for skeleton
+      // await new Promise(resolve => setTimeout(resolve, 1500)); 
       const loadedImages = await getImagesAction();
       setImages(loadedImages);
     } catch (e) {
@@ -43,7 +44,6 @@ export default function GalleryPage() {
 
 
   const handleLikeToggle = async (id: string) => {
-    // Optimistic UI update
     const originalImages = [...images];
     setImages((prevImages) =>
       prevImages.map((img) =>
@@ -56,18 +56,13 @@ export default function GalleryPage() {
     try {
       const result = await toggleLikeAction(id);
       if (!result.success || result.image === undefined) {
-        // Revert optimistic update on failure
         setImages(originalImages);
         toast({ variant: 'destructive', title: 'Failed to update like', description: result.error || "Could not update like status." });
       } else {
-        // Optionally, update with server state if it differs, though optimistic usually covers it
-        // For this simple increment, the optimistic update is likely fine.
-        // If the server returned the *actual* new like count and "liked" status for the user,
-        // you could use result.image.likes here.
          setImages((prevImages) =>
           prevImages.map((img) =>
             img.id === id
-              ? { ...img, likes: result.image!.likes } // Update with server's like count
+              ? { ...img, likes: result.image!.likes } 
               : img
           )
         );
@@ -78,38 +73,32 @@ export default function GalleryPage() {
       console.error("Failed to toggle like:", e);
     }
   };
-  
-  if (isLoading && images.length === 0 && !error) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <ParticleBackground />
-        <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <Logo />
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-            </div>
-          </div>
-        </header>
-        <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8 relative z-10">
-          <div className="space-y-8">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <SkeletonCard key={`initial-skeleton-${index}`} />
-            ))}
-          </div>
-        </main>
-         <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60 relative z-10 bg-background">
-          <p>&copy; {new Date().getFullYear()} DOT007. All rights reserved.</p>
-        </footer>
-      </div>
-    );
-  }
 
+  const handleShare = async (imageSrc: string) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Check out this image!',
+          text: 'I found this cool image in the gallery.',
+          url: window.location.href, // Shares the current gallery page URL
+        });
+        toast({ title: 'Shared!', description: 'Image link shared successfully.' });
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        await navigator.clipboard.writeText(window.location.href);
+        toast({ title: 'Link Copied!', description: 'Gallery link copied to clipboard.' });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({ variant: 'destructive', title: 'Sharing Failed', description: 'Could not share the image link.' });
+    }
+  };
+  
   return (
     <>
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-background/80 backdrop-blur-sm flex flex-col">
         <ParticleBackground />
-        <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Logo />
             <div className="flex items-center gap-2">
@@ -119,6 +108,13 @@ export default function GalleryPage() {
         </header>
 
         <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8 relative z-10">
+          {isLoading && images.length === 0 && !error && (
+            <div className="space-y-8">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <SkeletonCard key={`gallery-skeleton-${index}`} />
+              ))}
+            </div>
+          )}
           {error && (
             <Alert variant="destructive" className="my-4">
               <Terminal className="h-4 w-4" />
@@ -128,21 +124,20 @@ export default function GalleryPage() {
               </AlertDescription>
             </Alert>
           )}
-          {!error && images.length > 0 && (
-            <ImageGrid images={images} onLikeToggle={handleLikeToggle} />
-          )}
-          {!error && !isLoading && images.length === 0 && (
+          {!isLoading && !error && images.length === 0 && (
              <div className="text-center text-muted-foreground py-10">
                 <p>No images found. The gallery is currently empty.</p>
              </div>
           )}
+          {!error && images.length > 0 && (
+            <ImageGrid images={images} onLikeToggle={handleLikeToggle} onShare={handleShare} />
+          )}
         </main>
 
-        <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60 relative z-10 bg-background">
-          <p>&copy; {new Date().getFullYear()} Alosious Benny's Gallery. All rights reserved.</p>
+        <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60 relative z-10 bg-background/80 backdrop-blur-md">
+          <p>&copy; {new Date().getFullYear()} DOT007. All rights reserved.</p>
         </footer>
       </div>
       <Toaster />
     </>
   );
-}
