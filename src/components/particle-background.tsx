@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
-import { loadSlim } from 'tsparticles-slim'; 
+import { loadSlim } from '@tsparticles/slim'; 
 import type { Container, ISourceOptions } from '@tsparticles/engine';
 import { useTheme } from 'next-themes';
 
@@ -16,6 +16,8 @@ const ParticleBackground: React.FC = () => {
       await loadSlim(engine);
     }).then(() => {
       setInit(true);
+    }).catch(error => {
+      console.error("Error initializing particles engine:", error);
     });
   }, []);
 
@@ -85,6 +87,9 @@ const ParticleBackground: React.FC = () => {
         },
       },
       detectRetina: true,
+      background: {
+        color: resolvedTheme === 'dark' ? 'hsl(220 10% 10% / 0.8)' : 'hsl(220 20% 98% / 0.8)', // Match globals.css with opacity
+      }
     }),
     [resolvedTheme]
   );

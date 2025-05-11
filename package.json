@@ -38,7 +38,7 @@
     "@tanstack-query-firebase/react": "^1.0.5",
     "@tanstack/react-query": "^5.66.0",
     "@tsparticles/react": "^3.0.0",
-    "tsparticles-slim": "^2.12.0",
+    "@tsparticles/slim": "^3.0.0",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
