@@ -1,3 +1,4 @@
+
 'use server';
 
 import dbConnect from '@/lib/mongodb';
@@ -15,7 +16,7 @@ interface AddImageInput {
 interface ActionResult<T = null> {
   success: boolean;
   error?: string;
-  image?: T; // For addImageAction
+  data?: T; // Changed 'image' to 'data' for more generic use
 }
 
 // Helper to map MongoDB document to ImageType
@@ -61,7 +62,7 @@ export async function addImageAction(input: AddImageInput): Promise<ActionResult
     });
 
     const savedImage = await newImage.save();
-    return { success: true, image: mapMongoImageToImageType(savedImage) };
+    return { success: true, data: mapMongoImageToImageType(savedImage) };
   } catch (error: any) {
     console.error('Detailed error adding image:', error); // Log the full error object
     return { success: false, error: error.message || 'Failed to add image to database. Check server logs for details.' };
@@ -95,6 +96,29 @@ export async function getImagesAdminAction(): Promise<ImageType[]> {
   }
 }
 
+export async function deleteImageAction(imageId: string): Promise<ActionResult> {
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return { success: false, error: 'Unauthorized. Please log in.' };
+  }
+
+  if (!imageId) {
+    return { success: false, error: 'Image ID is required.' };
+  }
+
+  try {
+    await dbConnect();
+    const result = await ImageModel.findByIdAndDelete(imageId);
+    if (!result) {
+      return { success: false, error: 'Image not found or already deleted.' };
+    }
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting image:', error);
+    return { success: false, error: error.message || 'Failed to delete image.' };
+  }
+}
+
 
 export async function toggleLikeAction(imageId: string): Promise<ActionResult<{ likes: number }>> {
   try {
@@ -109,7 +133,7 @@ export async function toggleLikeAction(imageId: string): Promise<ActionResult<{ 
     image.likes = (image.likes || 0) + 1; 
         
     await image.save();
-    return { success: true, image: { likes: image.likes } };
+    return { success: true, data: { likes: image.likes } };
   } catch (error: any) {
     console.error('Error toggling like:', error);
     return { success: false, error: error.message || 'Failed to update like status.' };
@@ -158,3 +182,4 @@ export async function seedDatabase() {
 // if (process.env.NODE_ENV === 'development') {
 //   seedDatabase().catch(console.error);
 // }
+

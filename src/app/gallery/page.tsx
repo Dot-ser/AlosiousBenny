@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -5,14 +6,13 @@ import type { ImageType } from '@/types';
 import { ImageGrid } from '@/components/image-grid';
 import { Toaster } from '@/components/ui/toaster';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Share2 } from "lucide-react";
+import { Terminal } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
-import ParticleBackground from '../../components/particle-background'; // Changed to relative path
-
+import ParticleBackground from '../../components/particle-background'; 
 
 export default function GalleryPage() {
   const [images, setImages] = useState<ImageType[]>([]);
@@ -55,14 +55,14 @@ export default function GalleryPage() {
 
     try {
       const result = await toggleLikeAction(id);
-      if (!result.success || result.image === undefined) {
+      if (!result.success || result.data === undefined) {
         setImages(originalImages);
         toast({ variant: 'destructive', title: 'Failed to update like', description: result.error || "Could not update like status." });
       } else {
          setImages((prevImages) =>
           prevImages.map((img) =>
             img.id === id
-              ? { ...img, likes: result.image!.likes } 
+              ? { ...img, likes: result.data!.likes } 
               : img
           )
         );
@@ -76,21 +76,25 @@ export default function GalleryPage() {
 
   const handleShare = async (imageSrc: string) => {
     try {
+      const currentUrl = new URL(window.location.href);
+      // Use a clean URL for sharing, for example the base gallery URL
+      const shareUrl = `${currentUrl.protocol}//${currentUrl.host}/gallery`;
+
       if (navigator.share) {
         await navigator.share({
-          title: 'Check out this image!',
+          title: 'Check out this image from Alosious Benny\'s Gallery!',
           text: 'I found this cool image in the gallery.',
-          url: window.location.href, // Shares the current gallery page URL
+          url: shareUrl, 
         });
-        toast({ title: 'Shared!', description: 'Image link shared successfully.' });
+        toast({ title: 'Shared!', description: 'Gallery link shared successfully.' });
       } else {
         // Fallback for browsers that don't support Web Share API
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(shareUrl);
         toast({ title: 'Link Copied!', description: 'Gallery link copied to clipboard.' });
       }
     } catch (error) {
       console.error('Error sharing:', error);
-      toast({ variant: 'destructive', title: 'Sharing Failed', description: 'Could not share the image link.' });
+      toast({ variant: 'destructive', title: 'Sharing Failed', description: 'Could not share the gallery link.' });
     }
   };
   
@@ -98,7 +102,7 @@ export default function GalleryPage() {
     <>
       <div className="min-h-screen bg-background/80 backdrop-blur-sm flex flex-col">
         <ParticleBackground />
-        <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Logo />
             <div className="flex items-center gap-2">
@@ -134,10 +138,12 @@ export default function GalleryPage() {
           )}
         </main>
 
-        <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60 relative z-10 bg-background/80 backdrop-blur-md">
-          <p>&copy; {new Date().getFullYear()} DOT007. All rights reserved.</p>
+        <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60 relative z-10 bg-background/90 backdrop-blur-md">
+          <p>&copy; {new Date().getFullYear()} Alosious Benny&apos;s Gallery. All rights reserved.</p>
         </footer>
       </div>
       <Toaster />
     </>
   );
+
+}

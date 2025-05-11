@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,8 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
-import { addImageAction, getImagesAdminAction } from '@/actions/imageActions';
+import { addImageAction, getImagesAdminAction, deleteImageAction } from '@/actions/imageActions';
 import { logoutAction } from '@/actions/authActions';
 import { useRouter } from 'next/navigation';
 import { Loader2, Trash2, LogOut, ImageUp } from 'lucide-react';
@@ -24,6 +36,7 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingImages, setIsFetchingImages] = useState(true);
   const [uploadedImages, setUploadedImages] = useState<ImageType[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -96,7 +109,7 @@ export default function AdminDashboardPage() {
         alt: altText,
       });
 
-      if (result.success && result.image) {
+      if (result.success && result.data) {
         toast({ title: 'Image Added', description: 'Your image has been successfully added.' });
         setCaption('');
         setHashtags('');
@@ -114,6 +127,23 @@ export default function AdminDashboardPage() {
       toast({ variant: 'destructive', title: 'Error', description: error.message || 'Could not process or upload the image.' });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteImage = async (imageId: string) => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteImageAction(imageId);
+      if (result.success) {
+        toast({ title: 'Image Deleted', description: 'The image has been successfully deleted.' });
+        fetchUploadedImages(); // Refresh the list
+      } else {
+        toast({ variant: 'destructive', title: 'Deletion Failed', description: result.error || 'Could not delete the image.' });
+      }
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message || 'An unexpected error occurred during deletion.' });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -231,9 +261,32 @@ export default function AdminDashboardPage() {
                         />
                       <span className="truncate font-medium" title={image.caption}>{image.caption.length > 30 ? `${image.caption.substring(0,27)}...` : image.caption}</span>
                     </div>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" title="Delete (not implemented)">
-                      <Trash2 size={18} />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" title="Delete" disabled={isDeleting}>
+                          {isDeleting ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the image
+                            &quot;{image.caption}&quot; from the gallery.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteImage(image.id)}
+                            disabled={isDeleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Delete"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 ))}
               </div>
@@ -244,3 +297,4 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
