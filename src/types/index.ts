@@ -1,18 +1,19 @@
+
 export interface UserProfile {
   name: string;
-  avatarUrl: string;
+  avatarUrl: string; // Can be a placeholder or actual URL
 }
 
 export interface ImageType {
-  id: string;
-  src: string; // data URI or URL
+  id: string; // MongoDB ObjectId as string
+  src: string; 
   alt: string;
   caption: string;
   hashtags: string[];
   likes: number;
-  commentsCount: number; // Renamed for clarity
-  sharesCount: number;   // Renamed for clarity
-  liked: boolean;
-  user: UserProfile;
-  timestamp: string;
+  commentsCount: number;
+  sharesCount: number; // Consider if this will be implemented
+  liked: boolean; // Represents client-side state, may not be persisted per user without auth
+  user: UserProfile; // Uploader's profile (admin)
+  timestamp: string; // MongoDB timestamp will be converted to string for display
 }
