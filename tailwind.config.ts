@@ -82,11 +82,18 @@ export default {
   				to: {
   					height: '0'
   				}
-  			}
+  			},
+        'like-pulse-and-fade': {
+          '0%': { transform: 'scale(0.8)', opacity: '0' },
+          '25%': { transform: 'scale(1.3)', opacity: '1' }, // Increased scale for more pop
+          '50%': { transform: 'scale(1.1)', opacity: '0.9' }, // Hold a bit
+          '100%': { transform: 'scale(1.5)', opacity: '0' },
+        }
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+        'like-pulse-and-fade': 'like-pulse-and-fade 0.7s ease-out forwards',
   		}
   	}
   },
