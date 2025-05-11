@@ -38,10 +38,10 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
         </Button>
       </CardHeader>
 
-      <CardContent className="p-0 select-none pointer-events-none" onContextMenu={(e) => e.preventDefault()}>
+      <CardContent className="p-0 select-none" onContextMenu={(e) => e.preventDefault()}>
         {/* The container div with aspect-square ensures the image area is square.
-            next/image with fill and objectFit="cover" will make the image cover this square area,
-            maintaining its aspect ratio by cropping if necessary.
+            next/image with fill and objectFit="contain" will make the image fit within this square area,
+            maintaining its aspect ratio and potentially leaving letterbox/pillarbox space.
         */}
         <div className="aspect-square w-full relative">
            <Image
@@ -49,12 +49,13 @@ export function ImageCard({ image, onLikeToggle, onShare }: ImageCardProps) {
             alt={image.alt}
             fill 
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Example sizes, adjust as needed for responsiveness
-            objectFit="cover" // Ensures the image covers the container, cropping if necessary
-            className="bg-muted" // Removed object-cover from here as objectFit prop handles it
+            objectFit="contain" // Changed from "cover" to "contain"
+            className="bg-muted"
             data-ai-hint="social media post"
             unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')}
             priority={image.id === '1'} 
             onDragStart={(e) => e.preventDefault()}
+            onContextMenu={(e) => e.preventDefault()}
           />
         </div>
       </CardContent>
