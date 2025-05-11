@@ -1,0 +1,436 @@
+* {
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+	  background: linear-gradient(90deg, #000000 , #000000 , #09ff5f , #000000,#000000);
+    background-size: 600% 600%;
+    animation: gradientAnimation 30s linear infinite;
+  }
+  
+  @keyframes gradientAnimation {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+  
+header {
+  text-align: center;
+  margin-bottom: 10px;
+  margin-top: 5px;
+  position: fixed; /* Keep header at the top */
+  top: 10px; /* Adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000; /* Ensure header is above other content */
+  width: 100%;
+}
+
+header h1 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #00d84c;
+  margin: 0;
+  transition: color 0.3s ease;
+  text-shadow: 3px 3px 5px  rgb(0, 0, 0);
+
+}
+
+header h1 span {
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+
+.player {
+  background: #000000;
+  border-radius: 20px;
+  padding: 30px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  backdrop-filter: blur(10px);
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 80px; /* Add margin to avoid overlap with fixed header */
+}
+
+.player:hover {
+  transform: scale(1.02);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+}
+
+.loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  z-index: 10;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #1db954;
+  border-top: 4px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.thumbnail {
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.thumbnail:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
+}
+
+.player h2 { /* Target h2 inside .player */
+  margin: 0 0 15px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.player h2:hover { /* Target h2 inside .player */
+  color: #1ed760;
+}
+
+.player p { /* Target p inside .player */
+  margin: 0 0 20px;
+  font-size: 16px;
+  color: #ccc;
+}
+
+.controls {
+  font-size: 40px;
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.controls i {
+  cursor: pointer;
+  color: #1ed760;
+  transition: transform 0.2s ease, color 0.3s ease;
+}
+
+.controls i:hover {
+  transform: scale(1.2);
+  color: #1ed760;
+}
+
+.timeline-container {
+  margin-top: 20px;
+}
+
+
+
+.timeline {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #333;
+  border-radius: 10px;
+  outline: none;
+  transition: background 0.3s ease;
+}
+
+.timeline:hover {
+  background: #444;
+}
+
+.timeline::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1ed760;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  transition: background 0.3s ease;
+  
+}
+
+.timeline::-webkit-slider-thumb:hover {
+  background: #feffff;
+  box-shadow: 0 0 10px rgba(0, 253, 219, 0.8);
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #aaa;
+  margin-top: 8px;
+}
+
+audio {
+  display: none;
+}
+
+footer {
+  color: #ccc;
+  text-align: center;
+  padding: 10px;
+  width: 100%;
+  position: fixed; /* Keep footer at the bottom */
+  bottom: 0;
+  font-size: 14px;
+  background-color: rgba(0,0,0,0.5); /* Optional: add background to footer if body bg is complex */
+}
+
+footer a {
+  color: #1db954;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+footer a:hover {
+  color: #1ed760;
+}
+
+@media (max-width: 480px) {
+  .player h2 { /* Target h2 inside .player */
+    font-size: 18px;
+  }
+  .controls {
+    font-size: 32px;
+    gap: 30px;
+  }
+}
+.song-list {
+  position: fixed; /* Changed from absolute */
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100vh;
+  background: #111;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+  z-index: 999; /* Ensure it's below header but above player potentially */
+  transition: transform 0.3s ease;
+}
+
+.song-list.hidden {
+  transform: translateX(-100%);
+}
+
+.song-list h3 {
+  color: #1db954;
+  margin-top: 0;
+}
+
+.song-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.song-list li {
+  padding: 10px;
+  color: #fff;
+  cursor: pointer;
+  border-bottom: 1px solid #333;
+  transition: background 0.2s;
+}
+
+.song-list li:hover {
+  background: #1db954;
+  color: #000;
+}
+
+.song-list {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background: #000000;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 3px 0 12px rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  transition: transform 0.7s ease;
+}
+
+.song-list.hidden {
+  transform: translateX(-100%);
+}
+
+.song-list h3 {
+  color: #1db954;
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.song-list input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 15px;
+  font-size: 14px;
+  background: #1c1c1c;
+  color: #fff;
+  outline: none;
+}
+
+.song-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.song-list li {
+  padding: 12px 10px;
+  color: #ccc;
+  cursor: pointer;
+  border-bottom: 1px solid #2c2c2c;
+  transition: background 0.2s ease, color 0.2s ease;
+  border-radius: 15px;
+}
+
+.song-list li:hover {
+  background: #ffffffa1;
+  color: #000;
+}
+
+/* Custom scrollbar */
+.song-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.song-list::-webkit-scrollbar-track {
+  background: #1c1c1c;
+}
+
+.song-list::-webkit-scrollbar-thumb {
+  background-color: #00ffd5;
+  border-radius: 10px;
+}
+.song-list li.playing {
+  position: relative;
+  color: #00ffd5;
+  font-weight: bold;
+}
+
+.song-list li.playing::after {
+  display: none; /* Was 'none', ensure it shows if intended or remove if not */
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -20px; /* This might be too far left */
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  margin-left: 10px;
+  background: #000000;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00f8d7;
+  animation: pulse 1s infinite;
+}
+
+.song-list li.playing .waveform {
+  display: flex;
+  gap: 2px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.song-list li.playing .waveform span {
+  width: 3px;
+  height: 10px;
+  background:  #00ffd5;
+  animation: wave 1s infinite ease-in-out;
+}
+
+.song-list li.playing .waveform span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.song-list li.playing .waveform span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.song-list li.playing .waveform span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes wave {
+0%, 100% {
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.5);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.5);
+  }
+}
+#menuToggle{
+  position:absolute; 
+  top:16px; /* Adjusted to be relative to header, not viewport directly */
+  left:16px; 
+  font-size:30px; 
+  cursor:pointer;
+  color: #ffffff;
+  text-shadow: 3px 3px 5px rgb(0, 0, 0);
+  z-index: 1001; /* Ensure toggle is above song list */
+}
+#menuToggle:hover{
+  color: #1ed760;
+}
