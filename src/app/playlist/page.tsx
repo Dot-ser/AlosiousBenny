@@ -39,6 +39,8 @@ export default function PlaylistPage() {
         <meta property="og:image" content="https://files.catbox.moe/jkwu5t.jpg" />
         <meta name="twitter:image" content="https://files.catbox.moe/jkwu5t.jpg" />
         <link rel="icon" href="https://files.catbox.moe/4tr6ip.jpg" type="image/x-icon" />
+        {/* It's generally better to load external CSS like Font Awesome via npm package if possible,
+            or ensure it's truly necessary and a reliable CDN. For now, keeping as is. */}
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -60,7 +62,7 @@ export default function PlaylistPage() {
           <div className="spinner"></div>
         </div>
         <h2>Now Playing</h2>
-        <img id="thumbnail" src="" alt="Thumbnail" className="thumbnail" data-ai-hint="music album art" />
+        <img id="thumbnail" src={undefined} alt="Thumbnail" className="thumbnail" data-ai-hint="music album art" />
         <p id="songName"></p>
 
         <div className="controls">
@@ -87,3 +89,4 @@ export default function PlaylistPage() {
     </>
   );
 }
+
