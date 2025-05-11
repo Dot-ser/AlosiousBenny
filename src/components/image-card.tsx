@@ -15,7 +15,7 @@ interface ImageCardProps {
   image: ImageType;
   onLikeToggle: (id: string) => void;
   onShare: (id: string) => void;
-  priority?: boolean; // New prop for image priority
+  priority?: boolean;
 }
 
 export function ImageCard({ image, onLikeToggle, onShare, priority = false }: ImageCardProps) {
@@ -30,43 +30,45 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
       setShowLikeHeartAnimation(true);
       setTimeout(() => {
         setShowLikeHeartAnimation(false);
-      }, 700); // Animation duration should match CSS
+      }, 700); 
     }
   };
 
   const handleImageClickOrTap = () => {
     const currentTime = Date.now();
-    if (currentTime - lastClickTimeRef.current < 300) { // Double-click/tap threshold: 300ms
+    if (currentTime - lastClickTimeRef.current < 300) { 
       const aboutToLike = !image.liked;
-      if (aboutToLike) { // Only toggle if it's not already liked
+      // Always trigger like on double tap, even if already liked, to ensure animation consistency with UI feedback expectation
+      // However, only call onLikeToggle if it's not already liked to avoid an unnecessary unlike action
+      if (aboutToLike) {
         onLikeToggle(image.id);
       }
-      // Always show animation on double tap as feedback
       setShowLikeHeartAnimation(true);
       setTimeout(() => {
         setShowLikeHeartAnimation(false);
-      }, 700); // Animation duration
-      lastClickTimeRef.current = 0; // Reset after double tap
+      }, 700); 
+      lastClickTimeRef.current = 0; 
     } else {
-      lastClickTimeRef.current = currentTime; // Record first tap
+      lastClickTimeRef.current = currentTime; 
     }
   };
+
 
   const handleShareClick = () => {
     onShare(image.id);
   };
 
   return (
-    <Card id={`image-card-${image.id}`} className="w-full max-w-xl mx-auto shadow-lg rounded-xl overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between p-3 border-b">
+    <Card id={`image-card-${image.id}`} className="w-full max-w-xl mx-auto shadow-lg rounded-xl overflow-hidden bg-card">
+      <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-border">
         <div className="flex items-center space-x-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={image.user.avatarUrl || '/images/logo.jpg'} alt={image.user.name} data-ai-hint="profile picture user" />
             <AvatarFallback>{image.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
-          <span className="font-semibold text-sm">{image.user.name}</span>
+          <span className="font-semibold text-sm text-card-foreground">{image.user.name}</span>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-card-foreground">
           <MoreHorizontal className="h-5 w-5" />
           <span className="sr-only">More options</span>
         </Button>
@@ -78,17 +80,19 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
         style={{ cursor: 'pointer' }}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <div className="aspect-square w-full relative">
+        <div className="aspect-square w-full relative bg-muted/30">
            <Image
             src={image.src}
             alt={image.alt}
             fill 
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            // Optimized sizes prop: If viewport is <= 576px, image width is 100vw. Otherwise, it's 576px.
+            // This assumes max-w-xl for the card translates to roughly 576px.
+            sizes="(max-width: 576px) 100vw, 576px"
             objectFit="contain"
-            className="bg-muted"
+            className="bg-transparent" // Ensure image bg doesn't obscure parent bg-muted/30 if transparent parts
             data-ai-hint="social media post"
             unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')}
-            priority={priority} // Use the passed priority prop
+            priority={priority} 
             onDragStart={(e) => e.preventDefault()}
           />
           {showLikeHeartAnimation && (
@@ -103,32 +107,32 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
         </div>
       </CardContent>
 
-      <CardFooter className="flex flex-col items-start p-3 space-y-2">
+      <CardFooter className="flex flex-col items-start p-3 space-y-2 border-t border-border">
         <div className="flex items-center space-x-4 w-full">
           <Button variant="ghost" size="icon" onClick={handleLikeButtonClick} className="p-0 h-auto">
             <Heart
               className={cn(
                 "w-6 h-6 transition-all transform active:scale-90",
-                image.liked ? 'text-red-500 fill-red-500' : 'text-foreground/80' 
+                image.liked ? 'text-red-500 fill-red-500' : 'text-card-foreground/80 hover:text-card-foreground' 
               )}
             />
             <span className="sr-only">Like</span>
           </Button>
-          <Button variant="ghost" size="icon" className="p-0 h-auto">
-            <MessageCircle className="w-6 h-6 text-foreground/80" />
+          <Button variant="ghost" size="icon" className="p-0 h-auto text-card-foreground/80 hover:text-card-foreground">
+            <MessageCircle className="w-6 h-6" />
             <span className="sr-only">Comment</span>
           </Button>
-          <Button variant="ghost" size="icon" onClick={handleShareClick} className="p-0 h-auto">
-            <Send className="w-6 h-6 text-foreground/80" />
+          <Button variant="ghost" size="icon" onClick={handleShareClick} className="p-0 h-auto text-card-foreground/80 hover:text-card-foreground">
+            <Send className="w-6 h-6" />
             <span className="sr-only">Share</span>
           </Button>
         </div>
 
         {image.likes > 0 && (
-          <p className="font-semibold text-sm">{image.likes.toLocaleString()} like{image.likes !== 1 ? 's' : ''}</p>
+          <p className="font-semibold text-sm text-card-foreground">{image.likes.toLocaleString()} like{image.likes !== 1 ? 's' : ''}</p>
         )}
 
-        <div className="text-sm space-y-1 w-full">
+        <div className="text-sm space-y-1 w-full text-card-foreground">
           <p>
             <span className="font-semibold">{image.user.name}</span>{' '}
             {image.caption}
@@ -136,7 +140,7 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
           {image.hashtags && image.hashtags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {image.hashtags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-primary cursor-pointer hover:underline">
+                <Badge key={tag} variant="secondary" className="text-primary cursor-pointer hover:underline bg-muted text-muted-foreground hover:bg-muted/80">
                   #{tag}
                 </Badge>
               ))}
@@ -155,3 +159,4 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
     </Card>
   );
 }
+
