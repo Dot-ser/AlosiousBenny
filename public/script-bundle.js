@@ -1,3 +1,4 @@
+
 import { playlist } from './audiodb.js';
 
 const audio = document.getElementById('audio');
@@ -192,7 +193,7 @@ function populateSongList() {
         const filter = searchBox.value.toLowerCase();
         document.querySelectorAll('#songListItems li').forEach(li => {
             const trackName = li.textContent || "";
-            (li as HTMLElement).style.display = trackName.toLowerCase().includes(filter) ? 'block' : 'none';
+            li.style.display = trackName.toLowerCase().includes(filter) ? 'block' : 'none';
         });
     });
 }
@@ -209,7 +210,7 @@ updatePlayingIndicator();
 document.addEventListener('click', (event) => {
   if (!songListContainer || !menuToggle) return; 
 
-  const targetElement = event.target as Node;
+  const targetElement = event.target;
   const isClickInsideList = songListContainer.contains(targetElement);
   const isClickOnToggle = menuToggle.contains(targetElement);
 
