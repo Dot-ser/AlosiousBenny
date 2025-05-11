@@ -172,7 +172,10 @@ function populateSongList() {
         li.dataset.index = index.toString();
         li.addEventListener('click', () => {
             loadTrack(index);
-            if (songListContainer) songListContainer.classList.add('hidden');
+            if (songListContainer) {
+                songListContainer.classList.add('hidden');
+                if (menuToggle) menuToggle.style.display = 'block'; // Show menu toggle when song list is hidden
+            }
             if (audio && playBtn && pauseBtn) {
                 audio.play().then(() => {
                     playBtn.style.display = 'none';
@@ -201,6 +204,11 @@ function populateSongList() {
 if (menuToggle && songListContainer) {
     menuToggle.addEventListener('click', () => {
         songListContainer.classList.toggle('hidden');
+        if (songListContainer.classList.contains('hidden')) {
+            menuToggle.style.display = 'block';
+        } else {
+            menuToggle.style.display = 'none';
+        }
     });
 }
 
@@ -215,6 +223,9 @@ document.addEventListener('click', (event) => {
   const isClickOnToggle = menuToggle.contains(targetElement);
 
   if (!isClickInsideList && !isClickOnToggle) {
-      songListContainer.classList.add('hidden');
+      if (!songListContainer.classList.contains('hidden')) {
+          songListContainer.classList.add('hidden');
+          menuToggle.style.display = 'block'; // Show menu toggle when song list is hidden by clicking outside
+      }
   }
 });
