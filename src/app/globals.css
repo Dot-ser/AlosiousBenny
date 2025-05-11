@@ -39,37 +39,37 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
-    --background: 220 20% 3%; /* Deep dark background */
+    --background: 220 20% 2%; /* Deepest dark background */
     --foreground: 220 10% 95%; /* Light text for contrast */
-    --card: 220 15% 6%; /* Slightly lighter card background */
+    --card: 220 15% 4%; /* Darker card background, distinct from main */
     --card-foreground: 220 10% 95%;
-    --popover: 220 15% 6%;
+    --popover: 220 15% 4%; /* Darker popover background */
     --popover-foreground: 220 10% 95%;
     --primary: 207 90% 55%; /* Keep primary vibrant */
     --primary-foreground: 210 40% 98%;
-    --secondary: 220 15% 10%; /* Darker secondary elements */
-    --secondary-foreground: 220 10% 80%;
-    --muted: 220 15% 10%;
-    --muted-foreground: 220 10% 60%;
+    --secondary: 220 15% 7%; /* Darker secondary elements */
+    --secondary-foreground: 220 10% 75%;
+    --muted: 220 15% 7%; /* Darker muted elements */
+    --muted-foreground: 220 10% 55%;
     --accent: 207 90% 55%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 15% 12%; /* Darker borders */
-    --input: 220 15% 12%;
+    --border: 220 15% 8%; /* Darker borders, subtle */
+    --input: 220 15% 8%; /* Darker input fields */
     --ring: 207 90% 65%;
     --chart-1: 220 60% 55%;
     --chart-2: 160 50% 50%;
     --chart-3: 30 70% 60%;
     --chart-4: 280 55% 65%;
     --chart-5: 340 65% 60%;
-    --sidebar-background: 220 20% 2%; /* Deep dark sidebar */
+    --sidebar-background: 220 20% 1%; /* Extremely dark sidebar */
     --sidebar-foreground: 220 10% 90%;
     --sidebar-primary: 207 90% 55%;
     --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 220 15% 8%;
+    --sidebar-accent: 220 15% 5%; /* Darker sidebar accent */
     --sidebar-accent-foreground: 220 10% 95%;
-    --sidebar-border: 220 15% 8%;
+    --sidebar-border: 220 15% 5%; /* Darker sidebar border */
     --sidebar-ring: 207 90% 65%;
   }
 }
@@ -84,10 +84,10 @@
   }
 }
 
-/* Ensure particle background adapts to deep dark theme */
+/* Ensure particle background adapts to deep dark theme and is solid */
 .dark #tsparticles {
-  background-color: hsl(var(--background) / 0.8) !important; 
+  background-color: hsl(var(--background)) !important; 
 }
 #tsparticles {
-   background-color: hsl(var(--background) / 0.8) !important;
+   background-color: hsl(var(--background)) !important;
 }

@@ -87,9 +87,10 @@ const ParticleBackground: React.FC = () => {
         },
       },
       detectRetina: true,
-      background: {
-        color: resolvedTheme === 'dark' ? 'hsl(220 10% 10% / 0.8)' : 'hsl(220 20% 98% / 0.8)', // Match globals.css with opacity
-      }
+      // Removed background.color from here to let CSS in globals.css control it
+      // background: {
+      //   color: undefined, 
+      // }
     }),
     [resolvedTheme]
   );
