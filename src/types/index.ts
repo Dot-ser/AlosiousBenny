@@ -16,4 +16,5 @@ export interface ImageType {
   liked: boolean; // Represents client-side state, may not be persisted per user without auth
   user: UserProfile; // Uploader's profile (admin)
   timestamp: string; // MongoDB timestamp will be converted to string for display
+  order: number; // New field for image order
 }

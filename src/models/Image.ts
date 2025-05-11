@@ -24,6 +24,7 @@ export interface IImage extends Document {
   caption: string;
   hashtags: string[];
   likes: number;
+  order: number; // New field for image ordering
   // likedBy: Types.ObjectId[]; // To track specific users who liked, requires User auth for gallery
   comments: IComment[];
   user: { // Information about the uploader (admin)
@@ -42,6 +43,7 @@ const ImageSchema: Schema<IImage> = new Schema(
     caption: { type: String, required: true },
     hashtags: [{ type: String }],
     likes: { type: Number, default: 0 },
+    order: { type: Number, default: 0, index: true }, // Added order field with index
     // likedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     comments: [CommentSchema],
     user: { // Embedded uploader info
@@ -52,6 +54,16 @@ const ImageSchema: Schema<IImage> = new Schema(
   },
   { timestamps: true } // Adds createdAt and updatedAt
 );
+
+// Pre-save hook to set initial order for new images
+ImageSchema.pre('save', async function (next) {
+  if (this.isNew) {
+    const count = await ImageModel.countDocuments();
+    this.order = count; // Assigns a 0-indexed order
+  }
+  next();
+});
+
 
 const ImageModel = (models.Image as Model<IImage>) || mongoose.model<IImage>('Image', ImageSchema);
 

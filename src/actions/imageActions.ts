@@ -42,6 +42,7 @@ function mapMongoImageToImageType(mongoImage: IImage): ImageType {
       avatarUrl: mongoImage.user.avatarUrl || `/images/logo.jpg`,
     },
     timestamp: new Date(mongoImage.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toLocaleUpperCase(), 
+    order: mongoImage.order,
   };
 }
 
@@ -55,6 +56,7 @@ export async function addImageAction(input: AddImageInput): Promise<ActionResult
   try {
     await dbConnect();
     const adminUser = await getAdminUser(); 
+    const currentImageCount = await ImageModel.countDocuments();
 
     const newImage = new ImageModel({
       ...input,
@@ -64,6 +66,7 @@ export async function addImageAction(input: AddImageInput): Promise<ActionResult
         avatarUrl: adminUser.avatarUrl,
       },
       timestamp: new Date(),
+      order: currentImageCount, // Set initial order
     });
 
     const savedImage = await newImage.save();
@@ -80,7 +83,7 @@ export async function getImagesAction(page: number = 1, limit: number = 4): Prom
     const skip = (page - 1) * limit;
     const totalImages = await ImageModel.countDocuments();
     const imagesQuery = ImageModel.find()
-      .sort({ timestamp: -1 })
+      .sort({ order: 1 }) // Sort by order
       .skip(skip)
       .limit(limit)
       .lean();
@@ -108,7 +111,8 @@ export async function getImagesAdminAction(): Promise<ImageType[]> {
   }
   try {
     await dbConnect();
-    const images = await ImageModel.find().sort({ createdAt: -1 }).lean(); 
+    // Sort by 'order' ascending for admin view, so it matches gallery and is intuitive for reordering
+    const images = await ImageModel.find().sort({ order: 1 }).lean(); 
     return images.map(imageDoc => mapMongoImageToImageType(imageDoc as IImage));
   } catch (error) {
     console.error('Error fetching images for admin:', error);
@@ -128,10 +132,24 @@ export async function deleteImageAction(imageId: string): Promise<ActionResult> 
 
   try {
     await dbConnect();
-    const result = await ImageModel.findByIdAndDelete(imageId);
-    if (!result) {
+    const imageToDelete = await ImageModel.findById(imageId);
+    if (!imageToDelete) {
       return { success: false, error: 'Image not found or already deleted.' };
     }
+    
+    const deletedOrder = imageToDelete.order;
+    const result = await ImageModel.findByIdAndDelete(imageId);
+    if (!result) {
+        // This case should ideally not be hit if findById found it, but good for safety
+      return { success: false, error: 'Image not found or already deleted during deletion attempt.' };
+    }
+
+    // After deleting, update the order of subsequent images
+    await ImageModel.updateMany(
+      { order: { $gt: deletedOrder } },
+      { $inc: { order: -1 } }
+    );
+
     return { success: true };
   } catch (error: any) {
     console.error('Error deleting image:', error);
@@ -158,6 +176,36 @@ export async function toggleLikeAction(imageId: string): Promise<ActionResult<{ 
   }
 }
 
+export async function updateImageOrderAction(orderedImageIds: string[]): Promise<ActionResult> {
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return { success: false, error: 'Unauthorized. Please log in.' };
+  }
+
+  if (!Array.isArray(orderedImageIds) || orderedImageIds.some(id => typeof id !== 'string')) {
+    return { success: false, error: 'Invalid image order data.' };
+  }
+
+  try {
+    await dbConnect();
+    const bulkOps = orderedImageIds.map((id, index) => ({
+      updateOne: {
+        filter: { _id: id },
+        update: { $set: { order: index } },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await ImageModel.bulkWrite(bulkOps);
+    }
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error updating image order:', error);
+    return { success: false, error: error.message || 'Failed to update image order.' };
+  }
+}
+
+
 export async function seedDatabase() {
   if (process.env.MONGODB_URI) {
     await dbConnect();
@@ -174,6 +222,7 @@ export async function seedDatabase() {
           hashtags: ["Gudd", "nice", "music"],
           user: { name: admin.name, avatarUrl: admin.avatarUrl },
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
+          order: 0,
         },
         {
           src: "https://files.catbox.moe/k23ytz.jpg",
@@ -182,6 +231,7 @@ export async function seedDatabase() {
           hashtags: ["nice", "edm", "walker"],
           user: { name: admin.name, avatarUrl: admin.avatarUrl },
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), // 1 day ago
+          order: 1,
         }
       ];
 
@@ -197,6 +247,6 @@ export async function seedDatabase() {
     console.log('MONGODB_URI not defined, skipping seed.');
   }
 }
-if (process.env.NODE_ENV === 'development' && !process.env.VERCEL) {
-   // seedDatabase().catch(console.error); // Uncomment to seed on dev start locally
+if (process.env.NODE_ENV === 'development' && !process.env.VERCEL && process.env.SEED_DB_ON_START === 'true') {
+   seedDatabase().catch(console.error); 
 }
