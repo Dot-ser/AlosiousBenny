@@ -4,7 +4,7 @@
 import dbConnect from '@/lib/mongodb';
 import ImageModel, { type IImage } from '@/models/Image';
 import { isAuthenticated, getAdminUser } from './authActions';
-import type { ImageType } from '@/types'; // Assuming ImageType definition
+import type { ImageType } from '@/types';
 
 interface AddImageInput {
   src: string;
@@ -16,7 +16,13 @@ interface AddImageInput {
 interface ActionResult<T = null> {
   success: boolean;
   error?: string;
-  data?: T; // Changed 'image' to 'data' for more generic use
+  data?: T;
+}
+
+interface PaginatedImagesResult {
+  images: ImageType[];
+  hasMore: boolean;
+  totalImages: number;
 }
 
 // Helper to map MongoDB document to ImageType
@@ -29,13 +35,12 @@ function mapMongoImageToImageType(mongoImage: IImage): ImageType {
     hashtags: mongoImage.hashtags || [],
     likes: mongoImage.likes || 0,
     commentsCount: mongoImage.comments?.length || 0,
-    sharesCount: 0, // Assuming sharesCount is not stored in MongoDB yet
-    liked: false, // This would typically be user-specific, default to false for gallery view
+    sharesCount: 0, 
+    liked: false, 
     user: {
       name: mongoImage.user.name,
-      avatarUrl: mongoImage.user.avatarUrl || `https://i.pravatar.cc/150?u=${mongoImage.user.name}`,
+      avatarUrl: mongoImage.user.avatarUrl || `/images/logo.jpg`,
     },
-    // Kept original timestamp formatting, can be changed if needed e.g. toISOString()
     timestamp: new Date(mongoImage.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toLocaleUpperCase(), 
   };
 }
@@ -64,19 +69,34 @@ export async function addImageAction(input: AddImageInput): Promise<ActionResult
     const savedImage = await newImage.save();
     return { success: true, data: mapMongoImageToImageType(savedImage) };
   } catch (error: any) {
-    console.error('Detailed error adding image:', error); // Log the full error object
+    console.error('Detailed error adding image:', error);
     return { success: false, error: error.message || 'Failed to add image to database. Check server logs for details.' };
   }
 }
 
-export async function getImagesAction(): Promise<ImageType[]> {
+export async function getImagesAction(page: number = 1, limit: number = 4): Promise<PaginatedImagesResult> {
   try {
     await dbConnect();
-    const images = await ImageModel.find().sort({ timestamp: -1 }).lean();
-    return images.map(imageDoc => mapMongoImageToImageType(imageDoc as IImage));
+    const skip = (page - 1) * limit;
+    const totalImages = await ImageModel.countDocuments();
+    const imagesQuery = ImageModel.find()
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    
+    const images = await imagesQuery;
+    
+    const mappedImages = images.map(imageDoc => mapMongoImageToImageType(imageDoc as IImage));
+    
+    return {
+      images: mappedImages,
+      hasMore: page * limit < totalImages,
+      totalImages,
+    };
   } catch (error) {
     console.error('Error fetching images:', error);
-    return [];
+    return { images: [], hasMore: false, totalImages: 0 };
   }
 }
 
@@ -128,8 +148,6 @@ export async function toggleLikeAction(imageId: string): Promise<ActionResult<{ 
       return { success: false, error: 'Image not found.' };
     }
     
-    // This is a simplified like toggle for anonymous users, effectively just incrementing.
-    // A real system would track user-specific likes.
     image.likes = (image.likes || 0) + 1; 
         
     await image.save();
@@ -140,46 +158,45 @@ export async function toggleLikeAction(imageId: string): Promise<ActionResult<{ 
   }
 }
 
-// Basic function to seed database if empty (for testing/initial setup)
-// Not automatically run, needs to be called manually if desired (e.g. via a protected API route or script)
 export async function seedDatabase() {
-  await dbConnect();
-  const imageCount = await ImageModel.countDocuments();
-  if (imageCount === 0) {
-    console.log('No images found, seeding database...');
-    const admin = await getAdminUser(); // Use the admin user from .env for seeding
+  if (process.env.MONGODB_URI) {
+    await dbConnect();
+    const imageCount = await ImageModel.countDocuments();
+    if (imageCount === 0) {
+      console.log('No images found, seeding database...');
+      const admin = await getAdminUser();
 
-    const seedImages = [
-      {
-        src: "https://files.catbox.moe/weul01.jpg",
-        alt: "Narvent - Fainted album art",
-        caption: "Narvent - Fainted",
-        hashtags: ["Gudd", "nice", "music"],
-        user: { name: admin.name, avatarUrl: admin.avatarUrl },
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
-      },
-      {
-        src: "https://files.catbox.moe/k23ytz.jpg",
-        alt: "K-391 & Alan Walker - Ignite album art",
-        caption: "K-391 & Alan Walker - Ignite (feat. Julie Bergan & Seungri)",
-        hashtags: ["nice", "edm", "walker"],
-        user: { name: admin.name, avatarUrl: admin.avatarUrl },
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), // 1 day ago
+      const seedImages = [
+        {
+          src: "https://files.catbox.moe/weul01.jpg",
+          alt: "Narvent - Fainted album art",
+          caption: "Narvent - Fainted",
+          hashtags: ["Gudd", "nice", "music"],
+          user: { name: admin.name, avatarUrl: admin.avatarUrl },
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
+        },
+        {
+          src: "https://files.catbox.moe/k23ytz.jpg",
+          alt: "K-391 & Alan Walker - Ignite album art",
+          caption: "K-391 & Alan Walker - Ignite (feat. Julie Bergan & Seungri)",
+          hashtags: ["nice", "edm", "walker"],
+          user: { name: admin.name, avatarUrl: admin.avatarUrl },
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), // 1 day ago
+        }
+      ];
+
+      for (const imgData of seedImages) {
+          const image = new ImageModel(imgData);
+          await image.save();
       }
-    ];
-
-    for (const imgData of seedImages) {
-        const image = new ImageModel(imgData);
-        await image.save();
+      console.log('Database seeded with initial images.');
+    } else {
+      console.log('Database already contains images, skipping seed.');
     }
-    console.log('Database seeded with initial images.');
   } else {
-    console.log('Database already contains images, skipping seed.');
+    console.log('MONGODB_URI not defined, skipping seed.');
   }
 }
-
-// Example of how you might call seed (e.g. in a dev script or one-off admin action)
-// if (process.env.NODE_ENV === 'development') {
-//   seedDatabase().catch(console.error);
-// }
-
+if (process.env.NODE_ENV === 'development' && !process.env.VERCEL) {
+   // seedDatabase().catch(console.error); // Uncomment to seed on dev start locally
+}
