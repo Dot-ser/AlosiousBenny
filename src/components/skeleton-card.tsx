@@ -2,6 +2,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
+
 export function SkeletonCard() {
   return (
     <Card className="w-full max-w-xl mx-auto shadow-lg rounded-xl overflow-hidden">
