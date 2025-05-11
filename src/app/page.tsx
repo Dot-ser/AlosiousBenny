@@ -86,7 +86,7 @@ export default function HomePage() {
       <main className="flex-grow container mx-auto px-4 py-12 sm:py-16 md:py-20 flex flex-col items-center text-center z-10">
         <div className="mb-8">
           <Image
-            src="/images/logo.jpg"
+            src="src/images/logo.jpg"
             alt="Alosious Benny"
             width={160}
             height={160}
