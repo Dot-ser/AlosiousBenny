@@ -3,7 +3,7 @@
 
 import type { ImageType } from '@/types';
 import Image from 'next/image';
-import { Heart, MessageCircle, Send, MoreHorizontal } from 'lucide-react';
+import { Heart, MessageCircle, Send, MoreHorizontal, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -20,6 +20,7 @@ interface ImageCardProps {
 
 export function ImageCard({ image, onLikeToggle, onShare, priority = false }: ImageCardProps) {
   const [showLikeHeartAnimation, setShowLikeHeartAnimation] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const lastClickTimeRef = useRef(0);
 
   const handleLikeButtonClick = () => {
@@ -30,26 +31,24 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
       setShowLikeHeartAnimation(true);
       setTimeout(() => {
         setShowLikeHeartAnimation(false);
-      }, 700); 
+      }, 700);
     }
   };
 
   const handleImageClickOrTap = () => {
     const currentTime = Date.now();
-    if (currentTime - lastClickTimeRef.current < 300) { 
+    if (currentTime - lastClickTimeRef.current < 300) {
       const aboutToLike = !image.liked;
-      // Always trigger like on double tap, even if already liked, to ensure animation consistency with UI feedback expectation
-      // However, only call onLikeToggle if it's not already liked to avoid an unnecessary unlike action
       if (aboutToLike) {
         onLikeToggle(image.id);
       }
       setShowLikeHeartAnimation(true);
       setTimeout(() => {
         setShowLikeHeartAnimation(false);
-      }, 700); 
-      lastClickTimeRef.current = 0; 
+      }, 700);
+      lastClickTimeRef.current = 0;
     } else {
-      lastClickTimeRef.current = currentTime; 
+      lastClickTimeRef.current = currentTime;
     }
   };
 
@@ -74,8 +73,8 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
         </Button>
       </CardHeader>
 
-      <CardContent 
-        className="p-0 select-none relative" 
+      <CardContent
+        className="p-0 select-none relative"
         onClick={handleImageClickOrTap}
         style={{ cursor: 'pointer' }}
         onContextMenu={(e) => e.preventDefault()}
@@ -84,22 +83,31 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
            <Image
             src={image.src}
             alt={image.alt}
-            fill 
-            // Optimized sizes prop: If viewport is <= 576px, image width is 100vw. Otherwise, it's 576px.
-            // This assumes max-w-xl for the card translates to roughly 576px.
+            fill
             sizes="(max-width: 576px) 100vw, 576px"
-            objectFit="contain"
-            className="bg-transparent" // Ensure image bg doesn't obscure parent bg-muted/30 if transparent parts
+            style={{ objectFit: 'contain' }}
+            className="bg-transparent"
             data-ai-hint="social media post"
             unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')}
-            priority={priority} 
+            priority={priority}
             onDragStart={(e) => e.preventDefault()}
+            onLoadingComplete={() => {
+              setIsImageLoading(false);
+            }}
+            onError={() => {
+              setIsImageLoading(false); // Also stop loading on error
+            }}
           />
+          {isImageLoading && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-card/50 backdrop-blur-sm z-[5]">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            </div>
+          )}
           {showLikeHeartAnimation && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-              <Heart 
-                className="w-24 h-24 text-white animate-like-pulse-and-fade" 
-                fill="white" 
+              <Heart
+                className="w-24 h-24 text-white animate-like-pulse-and-fade"
+                fill="white"
                 style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))' }}
               />
             </div>
@@ -113,7 +121,7 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
             <Heart
               className={cn(
                 "w-6 h-6 transition-all transform active:scale-90",
-                image.liked ? 'text-red-500 fill-red-500' : 'text-card-foreground/80 hover:text-card-foreground' 
+                image.liked ? 'text-red-500 fill-red-500' : 'text-card-foreground/80 hover:text-card-foreground'
               )}
             />
             <span className="sr-only">Like</span>
@@ -147,7 +155,7 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
             </div>
           )}
         </div>
-        
+
         {image.commentsCount > 0 && (
             <p className="text-xs text-muted-foreground cursor-pointer hover:underline">
                 View all {image.commentsCount} comments
@@ -159,4 +167,3 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
     </Card>
   );
 }
-
