@@ -12,25 +12,18 @@ import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
-import { PageLoader } from '@/components/page-loader'; // Import the new PageLoader
+import { PageLoader } from '@/components/page-loader';
 import { cn } from '@/lib/utils';
-import type { Metadata } from 'next';
 
-
-// Page-specific metadata
-// export const metadata: Metadata = { // This needs to be in a server component or layout.ts for static export
-// title: "Alosious Benny Gallery",
-// description: "Explore the visual gallery of Alosious Benny.",
-// };
-// For client components, document title can be set in useEffect if needed, but metadata API is preferred.
 
 const INITIAL_LOAD_LIMIT = 4;
 const LOAD_MORE_LIMIT = 4;
 
 export default function GalleryPage() {
   const [images, setImages] = useState<ImageType[]>([]);
-  const [isPageReady, setIsPageReady] = useState(false); // Controls PageLoader exit and content fade-in
-  const [isFetchingImages, setIsFetchingImages] = useState(true); // General flag for data fetching
+  const [isPageReady, setIsPageReady] = useState(false); 
+  const [isFetchingInitialImages, setIsFetchingInitialImages] = useState(true);
+  const [isFetchingMoreImages, setIsFetchingMoreImages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreImages, setHasMoreImages] = useState(true);
@@ -39,10 +32,10 @@ export default function GalleryPage() {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const fetchImagesCallback = useCallback(async (page: number, limit: number, append: boolean = false) => {
-    if (!append) { // Initial load scenario (isFetchingImages is already true)
-       // For initial load, isFetchingImages is set by useEffect.
-    } else { // Load more scenario
-      setIsFetchingImages(true);
+    if (append) {
+      setIsFetchingMoreImages(true);
+    } else {
+      setIsFetchingInitialImages(true);
     }
     setError(null);
 
@@ -66,48 +59,50 @@ export default function GalleryPage() {
       toast({ variant: "destructive", title: "Error fetching images", description: errorMessage });
     } finally {
       if (append) {
-        setIsFetchingImages(false);
+        setIsFetchingMoreImages(false);
+      } else {
+        setIsFetchingInitialImages(false);
       }
-      // For initial load, isFetchingImages and isPageReady are handled in the initial useEffect.
     }
   }, [toast]);
 
   useEffect(() => {
-    document.title = "Alosious Benny Gallery"; // Set title for client component
+    document.title = "Alosious Benny's Gallery";
 
-    setIsFetchingImages(true);
     fetchImagesCallback(1, INITIAL_LOAD_LIMIT).finally(() => {
-      setIsFetchingImages(false); // Initial data fetch attempt is complete
-      setTimeout(() => { // Delay to allow PageLoader animation to be seen
+      // isFetchingInitialImages is set to false inside fetchImagesCallback
+      // Wait for a bit after initial data fetch completes before marking page as ready
+      // This allows the PageLoader's progress bar to complete.
+      setTimeout(() => {
         setIsPageReady(true);
-      }, 500); // Adjust delay as needed (e.g., 500ms)
 
-      if (typeof window !== 'undefined' && window.location.hash) {
-        const imageIdFromHash = window.location.hash.replace('#image-', '');
-        if (imageIdFromHash) {
-          setTimeout(() => {
-            const element = document.getElementById(`image-card-${imageIdFromHash}`);
-            if (element) {
-              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          }, 800); // Delay scrolling until after page fade-in
+        if (typeof window !== 'undefined' && window.location.hash) {
+          const imageIdFromHash = window.location.hash.replace('#image-', '');
+          if (imageIdFromHash) {
+            setTimeout(() => {
+              const element = document.getElementById(`image-card-${imageIdFromHash}`);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 800); 
+          }
         }
-      }
+      }, 1500); // Increased delay to allow progress bar to animate fully
     });
   }, [fetchImagesCallback]);
 
   const handleLoadMore = useCallback(() => {
-    if (hasMoreImages && !isFetchingImages && isPageReady) { // Only load more if page is ready and not already fetching
+    if (hasMoreImages && !isFetchingMoreImages && isPageReady) {
       fetchImagesCallback(currentPage + 1, LOAD_MORE_LIMIT, true);
     }
-  }, [hasMoreImages, isFetchingImages, currentPage, fetchImagesCallback, isPageReady]);
+  }, [hasMoreImages, isFetchingMoreImages, currentPage, fetchImagesCallback, isPageReady]);
 
   useEffect(() => {
-    if (!isPageReady || isFetchingImages) return; 
+    if (!isPageReady || isFetchingMoreImages || isFetchingInitialImages) return; 
 
     const currentObserver = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMoreImages && !isFetchingImages) {
+        if (entries[0].isIntersecting && hasMoreImages && !isFetchingMoreImages) {
           handleLoadMore();
         }
       },
@@ -125,7 +120,7 @@ export default function GalleryPage() {
         currentObserver.unobserve(currentLoaderRef);
       }
     };
-  }, [handleLoadMore, isPageReady, hasMoreImages, isFetchingImages]);
+  }, [handleLoadMore, isPageReady, hasMoreImages, isFetchingMoreImages, isFetchingInitialImages]);
 
 
   const handleLikeToggle = async (id: string) => {
@@ -169,7 +164,7 @@ export default function GalleryPage() {
     }
 
     const shareData = {
-      title: `Check out: ${imageToShare ? imageToShare.caption : "Alosious Benny Gallery Image"}`,
+      title: `Check out: ${imageToShare ? imageToShare.caption : "Alosious Benny's Gallery Image"}`,
       text: `I found this cool image "${caption}" in Alosious Benny's Gallery! Check it out:`,
       url: shareUrl,
     };
@@ -185,7 +180,6 @@ export default function GalleryPage() {
            toast({ title: 'Share Canceled', description: 'Sharing was canceled by the user.' });
           return;
         }
-         // Fallback to clipboard if share fails for other reasons (e.g. permission denied, but not AbortError)
          toast({ variant: 'destructive', title: 'Share Failed', description: 'Could not share directly. Link copied instead.'});
       }
     }
@@ -213,7 +207,7 @@ export default function GalleryPage() {
       <div className={cn(
           "min-h-screen bg-background/80 backdrop-blur-sm flex flex-col",
           isPageReady ? "opacity-100" : "opacity-0",
-          "transition-opacity duration-500 delay-[700ms]" // Delay fade-in until after PageLoader animation
+          "transition-opacity duration-500 delay-[1700ms]" // Increased delay to match PageLoader animation + buffer
         )}
       >
         <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
@@ -226,7 +220,7 @@ export default function GalleryPage() {
         </header>
 
         <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8 relative z-10">
-          {isFetchingImages && images.length === 0 && !error && (
+          {isFetchingInitialImages && images.length === 0 && !error && (
             <div className="space-y-8">
               {Array.from({ length: INITIAL_LOAD_LIMIT }).map((_, index) => (
                 <SkeletonCard key={`gallery-initial-skeleton-${index}`} />
@@ -242,7 +236,7 @@ export default function GalleryPage() {
               </AlertDescription>
             </Alert>
           )}
-          {!isFetchingImages && images.length === 0 && !error && (
+          {!isFetchingInitialImages && images.length === 0 && !error && (
              <div className="text-center text-muted-foreground py-10">
                 <p>No images found. The gallery is currently empty.</p>
              </div>
@@ -252,7 +246,7 @@ export default function GalleryPage() {
           
           <div ref={loadMoreRef} style={{ height: '10px', marginTop: '20px' }} />
 
-          {isFetchingImages && images.length > 0 && ( // Skeletons for loading more
+          {isFetchingMoreImages && images.length > 0 && ( 
             <div className="space-y-8 mt-8">
               {Array.from({ length: LOAD_MORE_LIMIT }).map((_, index) => (
                 <SkeletonCard key={`gallery-skeleton-more-${index}`} />
@@ -266,10 +260,11 @@ export default function GalleryPage() {
         </main>
 
         <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60 relative z-10 bg-background/90 backdrop-blur-md">
-          <p>&copy; {new Date().getFullYear()} Alosious Benny Gallery. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Alosious Benny's Gallery. All rights reserved.</p>
         </footer>
       </div>
       <Toaster />
     </>
   );
 }
+
