@@ -47,7 +47,7 @@ export function PageLoader({ isFinishing }: PageLoaderProps) {
     >
       <div className="text-center space-y-4 p-4">
         <h1 className="text-2xl font-semibold text-foreground animate-pulse">
-          Connecting to DOT-007 Gallery
+          Connecting to My Gallery
         </h1>
         <div className="w-80"> {/* Increased width from w-64 */}
           <Progress value={progress} className="h-2 [&>div]:bg-primary" />
