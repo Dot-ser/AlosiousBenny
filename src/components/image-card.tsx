@@ -1,8 +1,7 @@
-
 'use client';
 
 import type { ImageType } from '@/types';
-import Image from 'next/image';
+import NextImage from 'next/image'; // Renamed to NextImage to avoid conflict with local Image variable if any
 import { Heart, MessageCircle, Send, MoreHorizontal, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -35,18 +34,31 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
     }
   };
 
-  const handleImageClickOrTap = () => {
+  const handleImageClickOrTap = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Prevent click if it's on a button or interactive element inside the image area (if any were added)
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+
     const currentTime = Date.now();
-    if (currentTime - lastClickTimeRef.current < 300) {
+    if (currentTime - lastClickTimeRef.current < 300) { // 300ms for double click/tap
       const aboutToLike = !image.liked;
-      if (aboutToLike) {
+       // Always trigger like on double tap, even if already liked (it will unlike and re-like quickly, but animation shows)
+      if (!image.liked) {
         onLikeToggle(image.id);
+      } else {
+        // To ensure animation plays even if already liked, we can toggle it off and on quickly
+        // However, standard behavior is usually to only like if not already liked.
+        // Forcing animation:
+        onLikeToggle(image.id); // This will unlike
+        setTimeout(() => onLikeToggle(image.id), 50); // Then like again for animation
       }
+      
       setShowLikeHeartAnimation(true);
       setTimeout(() => {
         setShowLikeHeartAnimation(false);
-      }, 700);
-      lastClickTimeRef.current = 0;
+      }, 700); // Animation duration
+      lastClickTimeRef.current = 0; // Reset after double click
     } else {
       lastClickTimeRef.current = currentTime;
     }
@@ -79,16 +91,28 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
         style={{ cursor: 'pointer' }}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <div className="aspect-square w-full relative bg-muted/30">
-           <Image
+        {/* Image container - this div's height will be determined by the image's natural aspect ratio */}
+        <div className="w-full relative">
+          {isImageLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/30 min-h-[300px] z-[1]">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            </div>
+          )}
+          <NextImage
             src={image.src}
             alt={image.alt}
-            fill
-            sizes="(max-width: 576px) 100vw, 576px"
-            style={{ objectFit: 'contain' }}
-            className="bg-transparent"
-            data-ai-hint="social media post"
-            unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')}
+            width={0} // Required by Next.js, will be overridden by styles for natural aspect ratio
+            height={0} // Required by Next.js, will be overridden by styles for natural aspect ratio
+            sizes="(max-width: 576px) 100vw, 576px" // Card max-w-xl is 576px
+            style={{
+              width: '100%',
+              height: 'auto', // Let image determine its height
+              objectFit: 'contain', // Ensures the image is contained and aspect ratio is maintained
+            }}
+            className={cn(
+              isImageLoading ? "opacity-0" : "opacity-100 transition-opacity duration-300",
+              "bg-transparent" // Image itself is transparent until loaded
+            )}
             priority={priority}
             onDragStart={(e) => e.preventDefault()}
             onLoadingComplete={() => {
@@ -97,14 +121,12 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
             onError={() => {
               setIsImageLoading(false); // Also stop loading on error
             }}
+            unoptimized={image.src.startsWith('data:') || image.src.startsWith('https://files.catbox.moe')}
+            data-ai-hint="social media post"
           />
-          {isImageLoading && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-card/50 backdrop-blur-sm z-[5]">
-              <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            </div>
-          )}
+          {/* Like animation overlay, appears on top of the image */}
           {showLikeHeartAnimation && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[2]">
               <Heart
                 className="w-24 h-24 text-white animate-like-pulse-and-fade"
                 fill="white"
