@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -70,24 +69,24 @@ export default function GalleryPage() {
     document.title = "Alosious Benny's Gallery";
 
     fetchImagesCallback(1, INITIAL_LOAD_LIMIT).finally(() => {
-      // isFetchingInitialImages is set to false inside fetchImagesCallback
-      // Wait for a bit after initial data fetch completes before marking page as ready
-      // This allows the PageLoader's progress bar to complete.
+      // Short delay to allow PageLoader progress bar to visually complete if fetch is very fast,
+      // then mark page as ready for transition.
       setTimeout(() => {
         setIsPageReady(true);
 
         if (typeof window !== 'undefined' && window.location.hash) {
           const imageIdFromHash = window.location.hash.replace('#image-', '');
           if (imageIdFromHash) {
+            // Short delay for content to be rendered before scrolling
             setTimeout(() => {
               const element = document.getElementById(`image-card-${imageIdFromHash}`);
               if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }
-            }, 800); 
+            }, 300); // Adjusted delay for scrolling post-render
           }
         }
-      }, 1500); // Increased delay to allow progress bar to animate fully
+      }, 100); // Reduced delay for setting page ready
     });
   }, [fetchImagesCallback]);
 
@@ -180,16 +179,17 @@ export default function GalleryPage() {
            toast({ title: 'Share Canceled', description: 'Sharing was canceled by the user.' });
           return;
         }
-         toast({ variant: 'destructive', title: 'Share Failed', description: 'Could not share directly. Link copied instead.'});
+         // Fallback to clipboard copy if Web Share API fails for other reasons
       }
     }
 
+    // Fallback to clipboard copy
     if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(shareUrl);
         toast({
           title: 'Link Copied!',
-          description: `Link to "${caption}" copied to clipboard.`
+          description: `Link to "${caption}" copied to clipboard. ${!navigator.share ? 'Direct share not available.' : ''}`
         });
       } catch (error: any) {
         console.error('Clipboard API failed:', error);
@@ -207,7 +207,8 @@ export default function GalleryPage() {
       <div className={cn(
           "min-h-screen bg-background/80 backdrop-blur-sm flex flex-col",
           isPageReady ? "opacity-100" : "opacity-0",
-          "transition-opacity duration-500 delay-[1700ms]" // Increased delay to match PageLoader animation + buffer
+          // Adjust delay to match the new PageLoader readiness timing
+          "transition-opacity duration-500 delay-[100ms]" 
         )}
       >
         <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
@@ -267,4 +268,3 @@ export default function GalleryPage() {
     </>
   );
 }
-
