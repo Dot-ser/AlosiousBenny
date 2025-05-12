@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     fetchUploadedImages();
-  }, []);
+  }, [toast]); // Added toast to dependency array as it's used in fetchUploadedImages error handling
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -294,12 +294,12 @@ export default function AdminDashboardPage() {
         </Card>
 
         <Card className="shadow-lg">
-          <CardHeader className="flex flex-row justify-between items-center">
-            <div>
+          <CardHeader className="flex flex-row justify-between items-start"> {/* items-start for better alignment with multiline description */}
+            <div className="flex-grow"> {/* Allow text to take space */}
               <CardTitle className="text-2xl">Uploaded Images</CardTitle>
               <CardDescription>Drag to reorder images. Click save to persist changes.</CardDescription>
             </div>
-            <Button onClick={handleSaveOrder} disabled={isSavingOrder || isFetchingImages || uploadedImages.length === 0} size="sm">
+            <Button onClick={handleSaveOrder} disabled={isSavingOrder || isFetchingImages || uploadedImages.length === 0} size="sm" className="ml-4 shrink-0"> {/* Add margin and shrink-0 */}
               {isSavingOrder ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               Save Order
             </Button>

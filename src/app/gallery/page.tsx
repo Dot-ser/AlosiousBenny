@@ -12,15 +12,25 @@ import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
+import { PageLoader } from '@/components/page-loader'; // Import the new PageLoader
+import { cn } from '@/lib/utils';
+import type { Metadata } from 'next';
 
+
+// Page-specific metadata
+// export const metadata: Metadata = { // This needs to be in a server component or layout.ts for static export
+// title: "Alosious Benny Gallery",
+// description: "Explore the visual gallery of Alosious Benny.",
+// };
+// For client components, document title can be set in useEffect if needed, but metadata API is preferred.
 
 const INITIAL_LOAD_LIMIT = 4;
 const LOAD_MORE_LIMIT = 4;
 
 export default function GalleryPage() {
   const [images, setImages] = useState<ImageType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [isPageReady, setIsPageReady] = useState(false); // Controls PageLoader exit and content fade-in
+  const [isFetchingImages, setIsFetchingImages] = useState(true); // General flag for data fetching
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreImages, setHasMoreImages] = useState(true);
@@ -28,12 +38,11 @@ export default function GalleryPage() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-
-  const fetchImages = useCallback(async (page: number, limit: number, append: boolean = false) => {
-    if (append) {
-      setIsFetchingMore(true);
-    } else {
-      setIsLoading(true);
+  const fetchImagesCallback = useCallback(async (page: number, limit: number, append: boolean = false) => {
+    if (!append) { // Initial load scenario (isFetchingImages is already true)
+       // For initial load, isFetchingImages is set by useEffect.
+    } else { // Load more scenario
+      setIsFetchingImages(true);
     }
     setError(null);
 
@@ -41,9 +50,7 @@ export default function GalleryPage() {
       const result = await getImagesAction(page, limit);
       setImages(prevImages => {
         if (append) {
-          // Create a Set of existing image IDs for quick lookup
           const existingImageIds = new Set(prevImages.map(img => img.id));
-          // Filter out new images that are already present to prevent duplicate keys
           const newUniqueImages = result.images.filter(img => !existingImageIds.has(img.id));
           return [...prevImages, ...newUniqueImages];
         } else {
@@ -59,15 +66,22 @@ export default function GalleryPage() {
       toast({ variant: "destructive", title: "Error fetching images", description: errorMessage });
     } finally {
       if (append) {
-        setIsFetchingMore(false);
-      } else {
-        setIsLoading(false);
+        setIsFetchingImages(false);
       }
+      // For initial load, isFetchingImages and isPageReady are handled in the initial useEffect.
     }
   }, [toast]);
 
   useEffect(() => {
-    fetchImages(1, INITIAL_LOAD_LIMIT).then(() => {
+    document.title = "Alosious Benny Gallery"; // Set title for client component
+
+    setIsFetchingImages(true);
+    fetchImagesCallback(1, INITIAL_LOAD_LIMIT).finally(() => {
+      setIsFetchingImages(false); // Initial data fetch attempt is complete
+      setTimeout(() => { // Delay to allow PageLoader animation to be seen
+        setIsPageReady(true);
+      }, 500); // Adjust delay as needed (e.g., 500ms)
+
       if (typeof window !== 'undefined' && window.location.hash) {
         const imageIdFromHash = window.location.hash.replace('#image-', '');
         if (imageIdFromHash) {
@@ -76,31 +90,30 @@ export default function GalleryPage() {
             if (element) {
               element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-          }, 100);
+          }, 800); // Delay scrolling until after page fade-in
         }
       }
     });
-  }, [fetchImages]);
+  }, [fetchImagesCallback]);
 
   const handleLoadMore = useCallback(() => {
-    if (hasMoreImages && !isFetchingMore && !isLoading) {
-      fetchImages(currentPage + 1, LOAD_MORE_LIMIT, true);
+    if (hasMoreImages && !isFetchingImages && isPageReady) { // Only load more if page is ready and not already fetching
+      fetchImagesCallback(currentPage + 1, LOAD_MORE_LIMIT, true);
     }
-  }, [hasMoreImages, isFetchingMore, isLoading, currentPage, fetchImages]);
+  }, [hasMoreImages, isFetchingImages, currentPage, fetchImagesCallback, isPageReady]);
 
   useEffect(() => {
-    if (isLoading) return; 
+    if (!isPageReady || isFetchingImages) return; 
 
     const currentObserver = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMoreImages && !isFetchingMore) {
+        if (entries[0].isIntersecting && hasMoreImages && !isFetchingImages) {
           handleLoadMore();
         }
       },
       { threshold: 1.0 } 
     );
     observerRef.current = currentObserver;
-
 
     const currentLoaderRef = loadMoreRef.current;
     if (currentLoaderRef) {
@@ -112,7 +125,7 @@ export default function GalleryPage() {
         currentObserver.unobserve(currentLoaderRef);
       }
     };
-  }, [handleLoadMore, isLoading, hasMoreImages, isFetchingMore]);
+  }, [handleLoadMore, isPageReady, hasMoreImages, isFetchingImages]);
 
 
   const handleLikeToggle = async (id: string) => {
@@ -149,15 +162,14 @@ export default function GalleryPage() {
   const handleShare = async (imageId: string) => {
     const imageToShare = images.find(img => img.id === imageId);
     const caption = imageToShare ? imageToShare.caption : "this cool image";
-
+    
     let shareUrl = `${window.location.origin}/gallery#image-${imageId}`;
-     if (typeof window !== 'undefined' && window.location.host) {
-       shareUrl = `https://${window.location.host}/gallery#image-${imageId}`;
+    if (typeof window !== 'undefined' && window.location.host) {
+       shareUrl = `${window.location.protocol}//${window.location.host}/gallery#image-${imageId}`;
     }
 
-
     const shareData = {
-      title: `Check out: ${imageToShare ? imageToShare.caption : "Alosious Benny's Gallery Image"}`,
+      title: `Check out: ${imageToShare ? imageToShare.caption : "Alosious Benny Gallery Image"}`,
       text: `I found this cool image "${caption}" in Alosious Benny's Gallery! Check it out:`,
       url: shareUrl,
     };
@@ -173,6 +185,8 @@ export default function GalleryPage() {
            toast({ title: 'Share Canceled', description: 'Sharing was canceled by the user.' });
           return;
         }
+         // Fallback to clipboard if share fails for other reasons (e.g. permission denied, but not AbortError)
+         toast({ variant: 'destructive', title: 'Share Failed', description: 'Could not share directly. Link copied instead.'});
       }
     }
 
@@ -181,9 +195,7 @@ export default function GalleryPage() {
         await navigator.clipboard.writeText(shareUrl);
         toast({
           title: 'Link Copied!',
-          description: navigator.share ?
-            `Sharing via app failed, but link to "${caption}" copied to clipboard.` :
-            `Link to "${caption}" copied to clipboard.`
+          description: `Link to "${caption}" copied to clipboard.`
         });
       } catch (error: any) {
         console.error('Clipboard API failed:', error);
@@ -196,7 +208,14 @@ export default function GalleryPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-background/80 backdrop-blur-sm flex flex-col">
+      <PageLoader isFinishing={isPageReady} />
+      
+      <div className={cn(
+          "min-h-screen bg-background/80 backdrop-blur-sm flex flex-col",
+          isPageReady ? "opacity-100" : "opacity-0",
+          "transition-opacity duration-500 delay-[700ms]" // Delay fade-in until after PageLoader animation
+        )}
+      >
         <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Logo />
@@ -207,10 +226,10 @@ export default function GalleryPage() {
         </header>
 
         <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8 relative z-10">
-          {isLoading && images.length === 0 && !error && (
+          {isFetchingImages && images.length === 0 && !error && (
             <div className="space-y-8">
               {Array.from({ length: INITIAL_LOAD_LIMIT }).map((_, index) => (
-                <SkeletonCard key={`gallery-skeleton-${index}`} />
+                <SkeletonCard key={`gallery-initial-skeleton-${index}`} />
               ))}
             </div>
           )}
@@ -223,7 +242,7 @@ export default function GalleryPage() {
               </AlertDescription>
             </Alert>
           )}
-          {!isLoading && !error && images.length === 0 && (
+          {!isFetchingImages && images.length === 0 && !error && (
              <div className="text-center text-muted-foreground py-10">
                 <p>No images found. The gallery is currently empty.</p>
              </div>
@@ -233,8 +252,7 @@ export default function GalleryPage() {
           
           <div ref={loadMoreRef} style={{ height: '10px', marginTop: '20px' }} />
 
-
-          {isFetchingMore && (
+          {isFetchingImages && images.length > 0 && ( // Skeletons for loading more
             <div className="space-y-8 mt-8">
               {Array.from({ length: LOAD_MORE_LIMIT }).map((_, index) => (
                 <SkeletonCard key={`gallery-skeleton-more-${index}`} />
@@ -242,17 +260,16 @@ export default function GalleryPage() {
             </div>
           )}
 
-          {!isLoading && !hasMoreImages && images.length > 0 && (
+          {isPageReady && !hasMoreImages && images.length > 0 && (
             <p className="text-center text-muted-foreground mt-8">You&apos;ve reached the end of the gallery.</p>
           )}
         </main>
 
         <footer className="text-center p-6 text-sm text-muted-foreground border-t border-border/60 relative z-10 bg-background/90 backdrop-blur-md">
-          <p>&copy; {new Date().getFullYear()} Alosious Benny&apos;s Gallery. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Alosious Benny Gallery. All rights reserved.</p>
         </footer>
       </div>
       <Toaster />
     </>
   );
 }
-
