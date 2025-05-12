@@ -13,6 +13,7 @@ import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
 import { PageLoader } from '@/components/page-loader';
+import { ScrollCue } from '@/components/scroll-cue'; // Added import
 import { cn } from '@/lib/utils';
 
 
@@ -30,6 +31,7 @@ export default function GalleryPage() {
   const { toast } = useToast();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const [showScrollCue, setShowScrollCue] = useState(false); // State for scroll cue
 
   const fetchImagesCallback = useCallback(async (page: number, limit: number, append: boolean = false) => {
     if (append) {
@@ -43,7 +45,6 @@ export default function GalleryPage() {
       const result = await getImagesAction(page, limit);
       setImages(prevImages => {
         if (append) {
-          // Ensure no duplicates when appending
           const existingImageIds = new Set(prevImages.map(img => img.id));
           const newUniqueImages = result.images.filter(img => !existingImageIds.has(img.id));
           return [...prevImages, ...newUniqueImages];
@@ -71,16 +72,12 @@ export default function GalleryPage() {
     document.title = "Alosious Benny's Gallery";
 
     fetchImagesCallback(1, INITIAL_LOAD_LIMIT).finally(() => {
-      // Delay ensures loader progress visually completes if fetch is fast.
-      // Page becomes "ready" after this timeout, triggering loader's exit animation.
       setTimeout(() => {
         setIsPageReady(true);
-
-        // Scroll to image if hash is present
         if (typeof window !== 'undefined' && window.location.hash) {
           const imageIdFromHash = window.location.hash.replace('#image-', '');
           if (imageIdFromHash) {
-            setTimeout(() => { // Short delay for content to render
+            setTimeout(() => { 
               const element = document.getElementById(`image-card-${imageIdFromHash}`);
               if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -88,12 +85,37 @@ export default function GalleryPage() {
             }, 300);
           }
         }
-      }, 200); // Adjusted delay for better visual transition of loader
+      }, 200); 
     });
   }, [fetchImagesCallback]);
 
+  // Effect for showing and hiding scroll cue
+  useEffect(() => {
+    if (isPageReady && images.length > 0 && hasMoreImages) {
+      setShowScrollCue(true);
+      const timer = setTimeout(() => {
+        setShowScrollCue(false);
+      }, 7000); // Hide after 7 seconds
+
+      const handleScroll = () => {
+        if (window.scrollY > 50) { // Hide after scrolling a bit
+          setShowScrollCue(false);
+          window.removeEventListener('scroll', handleScroll);
+          clearTimeout(timer);
+        }
+      };
+      window.addEventListener('scroll', handleScroll);
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        clearTimeout(timer);
+      };
+    } else {
+      setShowScrollCue(false); // Ensure it's hidden if conditions aren't met
+    }
+  }, [isPageReady, images, hasMoreImages]); // images (object) as dep for its length
+
   const handleLoadMore = useCallback(() => {
-    if (hasMoreImages && !isFetchingMoreImages && !isFetchingInitialImages && isPageReady) { // Ensure initial load is done and page is ready
+    if (hasMoreImages && !isFetchingMoreImages && !isFetchingInitialImages && isPageReady) { 
       fetchImagesCallback(currentPage + 1, LOAD_MORE_LIMIT, true);
     }
   }, [hasMoreImages, isFetchingMoreImages, currentPage, fetchImagesCallback, isFetchingInitialImages, isPageReady]);
@@ -143,7 +165,7 @@ export default function GalleryPage() {
          setImages((prevImages) =>
           prevImages.map((img) =>
             img.id === id
-              ? { ...img, likes: result.data!.likes } // Ensure data is not null before accessing likes
+              ? { ...img, likes: result.data!.likes } 
               : img
           )
         );
@@ -164,7 +186,6 @@ export default function GalleryPage() {
        shareUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}#image-${imageId}`;
     }
 
-
     const shareData = {
       title: `Check out: ${imageToShare ? imageToShare.caption : "Alosious Benny's Gallery Image"}`,
       text: `I found this cool image "${caption}" in Alosious Benny's Gallery! Check it out:`,
@@ -178,16 +199,13 @@ export default function GalleryPage() {
         return;
       } catch (error: any) {
         console.warn('Web Share API failed or was cancelled:', error);
-        // Don't show error for AbortError, but do for others if needed, then fallback.
         if (error.name === 'AbortError') {
            toast({ title: 'Share Canceled', description: 'Sharing was canceled by the user.' });
-          return; // User cancelled, do not proceed to clipboard
+          return;
         }
-         // Fallback to clipboard copy if Web Share API fails for other reasons OR permission denied
       }
     }
 
-    // Fallback to clipboard copy
     if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(shareUrl);
@@ -207,11 +225,12 @@ export default function GalleryPage() {
   return (
     <>
       <PageLoader isFinishing={isPageReady} />
+      <ScrollCue isVisible={showScrollCue} />
       
       <div className={cn(
           "min-h-screen bg-background/80 backdrop-blur-sm flex flex-col",
           isPageReady ? "opacity-100" : "opacity-0",
-          "transition-opacity duration-500 delay-200" // Matches PageLoader's exit delay
+          "transition-opacity duration-500 delay-200" 
         )}
       >
         <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
