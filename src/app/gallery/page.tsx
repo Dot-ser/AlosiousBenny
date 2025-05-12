@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -42,6 +43,7 @@ export default function GalleryPage() {
       const result = await getImagesAction(page, limit);
       setImages(prevImages => {
         if (append) {
+          // Ensure no duplicates when appending
           const existingImageIds = new Set(prevImages.map(img => img.id));
           const newUniqueImages = result.images.filter(img => !existingImageIds.has(img.id));
           return [...prevImages, ...newUniqueImages];
@@ -69,32 +71,32 @@ export default function GalleryPage() {
     document.title = "Alosious Benny's Gallery";
 
     fetchImagesCallback(1, INITIAL_LOAD_LIMIT).finally(() => {
-      // Short delay to allow PageLoader progress bar to visually complete if fetch is very fast,
-      // then mark page as ready for transition.
+      // Delay ensures loader progress visually completes if fetch is fast.
+      // Page becomes "ready" after this timeout, triggering loader's exit animation.
       setTimeout(() => {
         setIsPageReady(true);
 
+        // Scroll to image if hash is present
         if (typeof window !== 'undefined' && window.location.hash) {
           const imageIdFromHash = window.location.hash.replace('#image-', '');
           if (imageIdFromHash) {
-            // Short delay for content to be rendered before scrolling
-            setTimeout(() => {
+            setTimeout(() => { // Short delay for content to render
               const element = document.getElementById(`image-card-${imageIdFromHash}`);
               if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }
-            }, 300); // Adjusted delay for scrolling post-render
+            }, 300);
           }
         }
-      }, 100); // Reduced delay for setting page ready
+      }, 200); // Adjusted delay for better visual transition of loader
     });
   }, [fetchImagesCallback]);
 
   const handleLoadMore = useCallback(() => {
-    if (hasMoreImages && !isFetchingMoreImages && isPageReady) {
+    if (hasMoreImages && !isFetchingMoreImages && !isFetchingInitialImages && isPageReady) { // Ensure initial load is done and page is ready
       fetchImagesCallback(currentPage + 1, LOAD_MORE_LIMIT, true);
     }
-  }, [hasMoreImages, isFetchingMoreImages, currentPage, fetchImagesCallback, isPageReady]);
+  }, [hasMoreImages, isFetchingMoreImages, currentPage, fetchImagesCallback, isFetchingInitialImages, isPageReady]);
 
   useEffect(() => {
     if (!isPageReady || isFetchingMoreImages || isFetchingInitialImages) return; 
@@ -141,7 +143,7 @@ export default function GalleryPage() {
          setImages((prevImages) =>
           prevImages.map((img) =>
             img.id === id
-              ? { ...img, likes: result.data!.likes }
+              ? { ...img, likes: result.data!.likes } // Ensure data is not null before accessing likes
               : img
           )
         );
@@ -157,10 +159,11 @@ export default function GalleryPage() {
     const imageToShare = images.find(img => img.id === imageId);
     const caption = imageToShare ? imageToShare.caption : "this cool image";
     
-    let shareUrl = `${window.location.origin}/gallery#image-${imageId}`;
+    let shareUrl = `${window.location.origin}${window.location.pathname}#image-${imageId}`;
     if (typeof window !== 'undefined' && window.location.host) {
-       shareUrl = `${window.location.protocol}//${window.location.host}/gallery#image-${imageId}`;
+       shareUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}#image-${imageId}`;
     }
+
 
     const shareData = {
       title: `Check out: ${imageToShare ? imageToShare.caption : "Alosious Benny's Gallery Image"}`,
@@ -174,12 +177,13 @@ export default function GalleryPage() {
         toast({ title: 'Shared!', description: 'Link to the image shared successfully.' });
         return;
       } catch (error: any) {
-        console.error('Web Share API failed:', error);
+        console.warn('Web Share API failed or was cancelled:', error);
+        // Don't show error for AbortError, but do for others if needed, then fallback.
         if (error.name === 'AbortError') {
            toast({ title: 'Share Canceled', description: 'Sharing was canceled by the user.' });
-          return;
+          return; // User cancelled, do not proceed to clipboard
         }
-         // Fallback to clipboard copy if Web Share API fails for other reasons
+         // Fallback to clipboard copy if Web Share API fails for other reasons OR permission denied
       }
     }
 
@@ -189,7 +193,7 @@ export default function GalleryPage() {
         await navigator.clipboard.writeText(shareUrl);
         toast({
           title: 'Link Copied!',
-          description: `Link to "${caption}" copied to clipboard. ${!navigator.share ? 'Direct share not available.' : ''}`
+          description: `Link to "${caption}" copied to clipboard. ${!navigator.share ? 'Direct share not available.' : 'Sharing permission denied or failed.'}`
         });
       } catch (error: any) {
         console.error('Clipboard API failed:', error);
@@ -207,8 +211,7 @@ export default function GalleryPage() {
       <div className={cn(
           "min-h-screen bg-background/80 backdrop-blur-sm flex flex-col",
           isPageReady ? "opacity-100" : "opacity-0",
-          // Adjust delay to match the new PageLoader readiness timing
-          "transition-opacity duration-500 delay-[100ms]" 
+          "transition-opacity duration-500 delay-200" // Matches PageLoader's exit delay
         )}
       >
         <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
@@ -245,11 +248,12 @@ export default function GalleryPage() {
 
           <ImageGrid images={images} onLikeToggle={handleLikeToggle} onShare={handleShare} />
           
-          <div ref={loadMoreRef} style={{ height: '10px', marginTop: '20px' }} />
+          <div ref={loadMoreRef} style={{ height: '1px', marginTop: '20px' }} aria-hidden="true" />
+
 
           {isFetchingMoreImages && images.length > 0 && ( 
             <div className="space-y-8 mt-8">
-              {Array.from({ length: LOAD_MORE_LIMIT }).map((_, index) => (
+              {Array.from({ length: Math.min(LOAD_MORE_LIMIT, INITIAL_LOAD_LIMIT) }).map((_, index) => (
                 <SkeletonCard key={`gallery-skeleton-more-${index}`} />
               ))}
             </div>

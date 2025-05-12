@@ -14,20 +14,18 @@ export function PageLoader({ isFinishing }: PageLoaderProps) {
   useEffect(() => {
     if (!isFinishing) {
       setProgress(0); // Reset progress if loader becomes active again
+      let currentProgress = 0;
       const timer = setInterval(() => {
-        setProgress((oldProgress) => {
-          if (oldProgress >= 100) {
-            clearInterval(timer);
-            return 100;
-          }
-          // Simulate loading progress
-          // Speed up towards the end if needed, or keep it simple
-          if (oldProgress < 70) return oldProgress + 10;
-          if (oldProgress < 90) return oldProgress + 5;
-          return oldProgress + 2;
-
-        });
-      }, 100); // Adjust interval for speed
+        currentProgress += Math.random() * 10 + 5; // More varied progress
+        if (currentProgress >= 95 && !isFinishing) { // Hold at 95% if not finishing
+           currentProgress = 95;
+        }
+        if (currentProgress >= 100) {
+           currentProgress = 100;
+           clearInterval(timer);
+        }
+        setProgress(currentProgress);
+      }, 150); // Adjusted interval for smoother feel
 
       return () => {
         clearInterval(timer);
@@ -51,7 +49,7 @@ export function PageLoader({ isFinishing }: PageLoaderProps) {
         <h1 className="text-2xl font-semibold text-foreground animate-pulse">
           Connecting to DOT-007 Gallery
         </h1>
-        <div className="w-64"> {/* Container for progress bar */}
+        <div className="w-80"> {/* Increased width from w-64 */}
           <Progress value={progress} className="h-2 [&>div]:bg-primary" />
         </div>
       </div>
