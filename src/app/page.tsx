@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
-import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic, GraduationCap, ChevronDown } from 'lucide-react';
+import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic, GraduationCap, ChevronDown, Code, Music, Camera, ShieldAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { HomePageLoader } from '@/components/home-page-loader';
 import { cn } from '@/lib/utils';
@@ -89,7 +89,7 @@ export default function HomePage() {
     <>
       <HomePageLoader isLoading={isPageLoading} />
       <div className={cn(
-          "min-h-screen bg-background text-foreground flex flex-col relative overflow-x-hidden", // Added overflow-x-hidden
+          "min-h-screen bg-background text-foreground flex flex-col relative overflow-x-hidden", 
           !isPageLoading ? "opacity-100" : "opacity-0",
           "transition-opacity duration-700 ease-in-out delay-100"
         )}
@@ -126,11 +126,14 @@ export default function HomePage() {
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 tracking-tight">
                 Alosious Benny
               </h1>
-              <div className="max-w-xl mb-8 space-y-3">
+              <div className="max-w-xl mb-6 space-y-3">
                 {personalDetails.map(detail => (
                   <DetailItem key={detail.label} icon={detail.icon} label={detail.label} value={detail.value} />
                 ))}
               </div>
+              <p className="max-w-xl text-lg text-muted-foreground mb-8 px-4">
+                A passionate individual with a keen interest in <strong className="text-foreground/90">developing</strong> innovative software solutions, exploring the realms of <strong className="text-foreground/90">ethical hacking</strong>, enjoying <strong className="text-foreground/90">music</strong>, and capturing moments through <strong className="text-foreground/90">photography</strong>.
+              </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <Button asChild size="lg" className="px-8 py-6 text-lg shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
                   <Link href="/gallery">
