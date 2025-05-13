@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import Head from 'next/head';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -79,6 +80,12 @@ export default function HomePage() {
 
   return (
     <>
+      <Head>
+        <link rel="icon" href="https://files.catbox.moe/alaz7q.png" type="image/x-icon" />
+        <meta property="og:image" content="https://files.catbox.moe/4tr6ip.jpg" />
+        <meta property="og:title" content="Alosious Benny" />
+        <meta property="og:description" content="Alosious Benny's Personal Website" />
+      </Head>
       <HomePageLoader isLoading={isPageLoading} />
       <div className={cn(
           "min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden",
