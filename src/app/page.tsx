@@ -12,6 +12,7 @@ import { HomePageLoader } from '@/components/home-page-loader';
 import { cn } from '@/lib/utils';
 import JourneyTimeline from '@/components/journey-timeline';
 import { incrementAndGetVisitorCount } from '@/actions/visitorActions';
+import { motion } from 'framer-motion';
 
 
 interface SocialLinkProps {
@@ -98,6 +99,34 @@ export default function HomePage() {
     }
   };
 
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (delay: number = 0) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, delay, ease: "easeOut" },
+    }),
+  };
+  
+  const listItemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.4,
+        ease: "easeOut"
+      },
+    }),
+  };
+
+
   return (
     <>
       <HomePageLoader isLoading={isPageLoading} />
@@ -123,9 +152,21 @@ export default function HomePage() {
 
         <main className="flex-grow">
           {/* Section 1: Profile */}
-          <section id="profile" className="min-h-screen flex flex-col items-center justify-center text-center py-16 px-4 relative">
+          <motion.section 
+            id="profile" 
+            className="min-h-screen flex flex-col items-center justify-center text-center py-16 px-4 relative"
+            variants={sectionVariants}
+            initial="hidden"
+            animate={!isPageLoading ? "visible" : "hidden"} // Animate when page is loaded
+            viewport={{ once: true, amount: 0.2 }}
+          >
             <div className="container mx-auto flex flex-col items-center">
-              <div className="mb-8">
+              <motion.div 
+                className="mb-8"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={!isPageLoading ? { opacity: 1, scale: 1 } : {}}
+                transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+              >
                 <Image
                   src="/images/logo.jpg"
                   alt="Alosious Benny"
@@ -135,19 +176,31 @@ export default function HomePage() {
                   priority
                   data-ai-hint="profile picture person"
                 />
-              </div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 tracking-tight">
+              </motion.div>
+              <motion.h1 
+                className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 tracking-tight"
+                variants={itemVariants} custom={0.3}
+              >
                 Alosious Benny
-              </h1>
-              <div className="max-w-xl mb-6 space-y-3">
+              </motion.h1>
+              <motion.div 
+                className="max-w-xl mb-6 space-y-3"
+                variants={itemVariants} custom={0.4}
+              >
                 {personalDetails.map(detail => (
                   <DetailItem key={detail.label} icon={detail.icon} label={detail.label} value={detail.value} />
                 ))}
-              </div>
-              <p className="max-w-xl text-lg text-muted-foreground mb-8 px-4">
+              </motion.div>
+              <motion.p 
+                className="max-w-xl text-lg text-muted-foreground mb-8 px-4"
+                variants={itemVariants} custom={0.5}
+              >
                 A passionate individual with a keen interest in <strong className="text-foreground/90">developing</strong> innovative software solutions, exploring the realms of <strong className="text-foreground/90">ethical hacking</strong>, enjoying <strong className="text-foreground/90">music</strong>, and capturing moments through <strong className="text-foreground/90">photography</strong>.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+              </motion.p>
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-4 mb-12"
+                variants={itemVariants} custom={0.6}
+              >
                 <Button asChild size="lg" className="px-8 py-6 text-lg shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
                   <Link href="/gallery">
                     Explore My Gallery <ExternalLink size={20} className="ml-2" />
@@ -163,16 +216,23 @@ export default function HomePage() {
                      My Playlist <ListMusic size={20} className="ml-2" />
                   </Link>
                 </Button>
-              </div>
+              </motion.div>
               <Button variant="ghost" onClick={() => scrollToSection('journey')} className="absolute bottom-10 animate-bounce">
                 <ChevronDown size={32} />
                 <span className="sr-only">Scroll to Journey</span>
               </Button>
             </div>
-          </section>
+          </motion.section>
 
           {/* Section 2: Journey */}
-          <section id="journey" className="min-h-screen flex flex-col items-center justify-center py-16 px-4 bg-secondary/30 relative">
+          <motion.section 
+            id="journey" 
+            className="min-h-screen flex flex-col items-center justify-center py-16 px-4 bg-secondary/30 relative"
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+          >
             <div className="container mx-auto">
               <JourneyTimeline />
             </div>
@@ -180,39 +240,79 @@ export default function HomePage() {
               <ChevronDown size={32} />
               <span className="sr-only">Scroll to Interests</span>
             </Button>
-          </section>
+          </motion.section>
 
           {/* Section 3: Interests & Connect */}
-          <section id="interests" className="min-h-screen flex flex-col items-center justify-center py-16 px-4 relative">
+          <motion.section 
+            id="interests" 
+            className="min-h-screen flex flex-col items-center justify-center py-16 px-4 relative"
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+          >
             <div className="container mx-auto flex flex-col items-center">
-              <div className="max-w-2xl w-full mb-10 text-left">
+              <motion.div 
+                className="max-w-2xl w-full mb-10 text-left"
+                variants={itemVariants} custom={0.1}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
+              >
                 <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-center text-foreground flex items-center justify-center gap-2">
                   <Lightbulb className="h-7 w-7 text-primary" />
                   Interests & Activities
                 </h2>
                 <ul className="list-none space-y-3 text-muted-foreground">
                   {hobbies.map((hobby, index) => (
-                    <li key={index} className="flex items-start p-3 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <motion.li 
+                      key={index} 
+                      className="flex items-start p-3 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                      custom={index}
+                      variants={listItemVariants}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true, amount: 0.2 }}
+                    >
                       <span className="text-primary mr-3 mt-1">&#10003;</span>
                       <span className="text-lg">{hobby}</span>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
 
-              <div className="mt-12 pt-10 border-t border-border/60 w-full max-w-lg">
+              <motion.div 
+                className="mt-12 pt-10 border-t border-border/60 w-full max-w-lg"
+                variants={itemVariants} custom={0.3} // Stagger after hobbies potentially
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+              >
                 <h2 className="text-base uppercase text-muted-foreground mb-6 tracking-wider font-semibold text-center">Connect With Me</h2>
                 <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-4">
-                  {socialLinks.map((link) => (
-                    <SocialLinkItem key={link.href} {...link} />
+                  {socialLinks.map((link, index) => (
+                     <motion.div
+                        key={link.href}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                        viewport={{ once: true }}
+                      >
+                      <SocialLinkItem {...link} />
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </section>
+          </motion.section>
         </main>
 
-        <footer className="text-center p-8 text-sm text-muted-foreground border-t border-border/60 z-10">
+        <motion.footer 
+          className="text-center p-8 text-sm text-muted-foreground border-t border-border/60 z-10"
+          initial={{ opacity: 0 }}
+          animate={!isPageLoading ? { opacity: 1 } : {}}
+          transition={{ duration: 0.5, delay: 0.8 }} // Late animation for footer
+        >
           <p>&copy; {new Date().getFullYear()} Alosious Benny. All rights reserved.</p>
            {visitorCount !== null && (
             <div className="mt-2 flex items-center justify-center text-xs text-muted-foreground/80">
@@ -220,8 +320,9 @@ export default function HomePage() {
               <span>Site visits: {visitorCount.toLocaleString()}</span>
             </div>
           )}
-        </footer>
+        </motion.footer>
       </div>
     </>
   );
 }
+
