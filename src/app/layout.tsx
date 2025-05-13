@@ -1,21 +1,24 @@
+
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster"; 
 import { ThemeProvider } from "@/components/providers/theme-provider";
+
 
 export const metadata: Metadata = {
   title: 'DOT007 - Alosious Benny',
-  description: 'Alosious Benny , Song4u - Lesson My Favorite Songs',
-  keywords: ['Alosious Benny', 'Song4u', 'Music', 'Player', 'Web App'],
+  description:
+    'Explore the personal portfolio of Alosious Benny, a passionate developer and creative problem-solver. Showcasing projects, skills, and experience in full-stack development, UI/UX design, and emerging technologies.',
   authors: [{ name: 'DOTSERMODZ' }],
   themeColor: '#000000',
   openGraph: {
-    title: 'Alosious Benny , Favorite Playlist',
-    description: 'Alosious Benny , Song4u - listen to My Favorite Songs',
-    url: 'https://alosiousbenny.vercel.app/Playlist',
+    title: 'Alosious Benny',
+    description:
+      'Welcome to the official portfolio of Alosious Benny. Dive into a curated collection of innovative projects, tech insights, and personal achievements in software development and digital design.',
+    url: 'https://alosiousbenny.vercel.app/',
     type: 'website',
-    siteName: 'Alosious Benny',
+    siteName: 'Alosious Benny, Personal Website',
     images: ['https://files.catbox.moe/jkwu5t.jpg'],
   },
   icons: {
@@ -25,6 +28,7 @@ export const metadata: Metadata = {
     images: ['https://files.catbox.moe/jkwu5t.jpg'],
   },
 };
+
 
 export default function RootLayout({
   children,
@@ -45,7 +49,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
           storageKey="ui-theme"
