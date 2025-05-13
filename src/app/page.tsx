@@ -6,11 +6,12 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
-import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic, GraduationCap, ChevronDown, Code, Music, Camera, ShieldAlert } from 'lucide-react';
+import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic, GraduationCap, ChevronDown, Code, Music, Camera, ShieldAlert, Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { HomePageLoader } from '@/components/home-page-loader';
 import { cn } from '@/lib/utils';
 import JourneyTimeline from '@/components/journey-timeline';
+import { incrementAndGetVisitorCount } from '@/actions/visitorActions';
 
 
 interface SocialLinkProps {
@@ -47,11 +48,23 @@ const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, value }) => 
 
 export default function HomePage() {
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsPageLoading(false);
     }, 1500);
+
+    const fetchVisitorCount = async () => {
+      const result = await incrementAndGetVisitorCount();
+      if (result.success && typeof result.count === 'number') {
+        setVisitorCount(result.count);
+      } else {
+        console.warn("Failed to fetch or increment visitor count:", result.error);
+      }
+    };
+    fetchVisitorCount();
+    
     return () => clearTimeout(timer);
   }, []);
 
@@ -201,9 +214,14 @@ export default function HomePage() {
 
         <footer className="text-center p-8 text-sm text-muted-foreground border-t border-border/60 z-10">
           <p>&copy; {new Date().getFullYear()} Alosious Benny. All rights reserved.</p>
+           {visitorCount !== null && (
+            <div className="mt-2 flex items-center justify-center text-xs text-muted-foreground/80">
+              <Eye size={14} className="mr-1.5" />
+              <span>Site visits: {visitorCount.toLocaleString()}</span>
+            </div>
+          )}
         </footer>
       </div>
     </>
   );
 }
-
