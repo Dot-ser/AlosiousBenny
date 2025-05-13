@@ -42,22 +42,19 @@ export function ImageCard({ image, onLikeToggle, onShare, priority = false }: Im
 
     const currentTime = Date.now();
     if (currentTime - lastClickTimeRef.current < 300) { // 300ms for double click/tap
-      const aboutToLike = !image.liked;
-       // Always trigger like on double tap, even if already liked (it will unlike and re-like quickly, but animation shows)
-      if (!image.liked) {
-        onLikeToggle(image.id);
-      } else {
-        // To ensure animation plays even if already liked, we can toggle it off and on quickly
-        // However, standard behavior is usually to only like if not already liked.
-        // Forcing animation:
-        onLikeToggle(image.id); // This will unlike
-        setTimeout(() => onLikeToggle(image.id), 50); // Then like again for animation
-      }
       
+      // Always show animation on double tap
       setShowLikeHeartAnimation(true);
       setTimeout(() => {
         setShowLikeHeartAnimation(false);
       }, 700); // Animation duration
+
+      // Only toggle like state if it's not already liked.
+      // This prevents the rapid unlike/re-like sequence that could cause lag.
+      if (!image.liked) {
+        onLikeToggle(image.id);
+      }
+      
       lastClickTimeRef.current = 0; // Reset after double click
     } else {
       lastClickTimeRef.current = currentTime;
