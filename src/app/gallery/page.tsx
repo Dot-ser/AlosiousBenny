@@ -12,7 +12,7 @@ import { SkeletonCard } from '@/components/skeleton-card';
 import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
-import { PageLoader } from '@/components/page-loader';
+import { PageLoader } from '@/components/gallery-page-loader';
 import { ScrollCue } from '@/components/scroll-cue';
 import { cn } from '@/lib/utils';
 
