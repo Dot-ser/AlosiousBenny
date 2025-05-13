@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -6,7 +5,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
-import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic, GraduationCap, ChevronDown, Code, Music, Camera, ShieldAlert, Eye } from 'lucide-react';
+import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic, GraduationCap, ChevronDown, Code, Music, Camera, ShieldAlert, Eye, Bot, Music2, Download, Webhook, Zap, FolderKanban } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { HomePageLoader } from '@/components/home-page-loader';
 import { cn } from '@/lib/utils';
@@ -45,6 +44,24 @@ const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, value }) => 
     <span className="text-muted-foreground"><span className="font-semibold text-foreground/90">{label}:</span> {value}</span>
   </div>
 );
+
+interface ProjectShowcaseItem {
+  id: string;
+  title: string;
+  icon: React.ElementType;
+  description: string;
+}
+
+const projectShowcaseItems: ProjectShowcaseItem[] = [
+  { id: 'tg-bot', title: 'Multi-Feature Telegram Bot', icon: Bot, description: 'A versatile bot with various functionalities for Telegram users.' },
+  { id: 'music-ui', title: 'Music Player UI', icon: Music2, description: 'An intuitive and aesthetically pleasing music player interface.' },
+  { id: 'yt-dl', title: 'Youtube Downloader', icon: Download, description: 'Tool for downloading videos and audio from YouTube.' },
+  { id: 'insta-dl', title: 'Instagram Downloader', icon: Instagram, description: 'Utility to download media content from Instagram.' },
+  { id: 'yt-dl-api', title: 'YT Download API', icon: Webhook, description: 'An API service for YouTube content downloading capabilities.' },
+  { id: 'phishing-tool', title: 'Phishing Simulation Tool', icon: ShieldAlert, description: 'Educational tool for demonstrating phishing vulnerabilities.' },
+  { id: 'ddos-tool', title: 'DDoS Attack Simulation Tool', icon: Zap, description: 'A tool for simulating and understanding DDoS attacks.' },
+  { id: 'camphish', title: 'Camphish Tool', icon: Camera, description: 'Demonstration tool related to camera access vulnerabilities.' },
+];
 
 
 export default function HomePage() {
@@ -142,6 +159,7 @@ export default function HomePage() {
             <nav className="hidden md:flex items-center gap-4">
               <Button variant="ghost" onClick={() => scrollToSection('profile')}>Profile</Button>
               <Button variant="ghost" onClick={() => scrollToSection('journey')}>Journey</Button>
+              <Button variant="ghost" onClick={() => scrollToSection('projects')}>Projects</Button>
               <Button variant="ghost" onClick={() => scrollToSection('interests')}>Interests</Button>
             </nav>
             <div className="flex items-center gap-2">
@@ -157,7 +175,7 @@ export default function HomePage() {
             className="min-h-screen flex flex-col items-center justify-center text-center py-16 px-4 relative"
             variants={sectionVariants}
             initial="hidden"
-            animate={!isPageLoading ? "visible" : "hidden"} // Animate when page is loaded
+            animate={!isPageLoading ? "visible" : "hidden"}
             viewport={{ once: true, amount: 0.2 }}
           >
             <div className="container mx-auto flex flex-col items-center">
@@ -236,13 +254,62 @@ export default function HomePage() {
             <div className="container mx-auto">
               <JourneyTimeline />
             </div>
-            <Button variant="ghost" onClick={() => scrollToSection('interests')} className="absolute bottom-10 animate-bounce">
+            <Button variant="ghost" onClick={() => scrollToSection('projects')} className="absolute bottom-10 animate-bounce">
               <ChevronDown size={32} />
-              <span className="sr-only">Scroll to Interests</span>
+              <span className="sr-only">Scroll to Projects</span>
             </Button>
           </motion.section>
 
-          {/* Section 3: Interests & Connect */}
+          {/* Section 3: Projects Showcase */}
+          <motion.section
+            id="projects"
+            className="min-h-screen flex flex-col items-center justify-center py-16 px-4 relative"
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+          >
+            <div className="container mx-auto flex flex-col items-center">
+              <motion.div
+                className="max-w-3xl w-full mb-10 text-left"
+                variants={itemVariants} custom={0.1}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+              >
+                <h2 className="text-3xl sm:text-4xl font-bold mb-10 text-center text-foreground flex items-center justify-center gap-3">
+                  <Briefcase className="h-8 w-8 text-primary" /> {/* Changed icon */}
+                  Projects Showcase
+                </h2>
+                <div className="space-y-4">
+                  {projectShowcaseItems.map((project, index) => (
+                    <motion.div
+                      key={project.id}
+                      className="flex items-start p-4 bg-card rounded-xl shadow-lg hover:shadow-primary/10 transition-all duration-300"
+                      custom={index}
+                      variants={listItemVariants}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true, amount: 0.2 }}
+                    >
+                      <project.icon className="h-8 w-8 text-primary mr-4 mt-1 shrink-0" />
+                      <div>
+                        <h3 className="text-xl font-semibold text-card-foreground">{project.title}</h3>
+                        <p className="text-muted-foreground mt-1">{project.description}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+              <Button variant="ghost" onClick={() => scrollToSection('interests')} className="absolute bottom-10 animate-bounce">
+                <ChevronDown size={32} />
+                <span className="sr-only">Scroll to Interests</span>
+              </Button>
+            </div>
+          </motion.section>
+
+
+          {/* Section 4: Interests & Connect */}
           <motion.section 
             id="interests" 
             className="min-h-screen flex flex-col items-center justify-center py-16 px-4 relative"
@@ -283,7 +350,7 @@ export default function HomePage() {
 
               <motion.div 
                 className="mt-12 pt-10 border-t border-border/60 w-full max-w-lg"
-                variants={itemVariants} custom={0.3} // Stagger after hobbies potentially
+                variants={itemVariants} custom={0.3} 
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
@@ -311,7 +378,7 @@ export default function HomePage() {
           className="text-center p-8 text-sm text-muted-foreground border-t border-border/60 z-10"
           initial={{ opacity: 0 }}
           animate={!isPageLoading ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 0.8 }} // Late animation for footer
+          transition={{ duration: 0.5, delay: 0.8 }}
         >
           <p>&copy; {new Date().getFullYear()} Alosious Benny. All rights reserved.</p>
            {visitorCount !== null && (
@@ -325,4 +392,3 @@ export default function HomePage() {
     </>
   );
 }
-
