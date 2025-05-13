@@ -6,10 +6,11 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
-import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic } from 'lucide-react';
+import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic, GraduationCap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { HomePageLoader } from '@/components/home-page-loader';
 import { cn } from '@/lib/utils';
+import JourneyTimeline from '@/components/journey-timeline';
 
 
 interface SocialLinkProps {
@@ -50,7 +51,7 @@ export default function HomePage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsPageLoading(false);
-    }, 1500); // Simulate loading time, adjust as needed
+    }, 1500); 
     return () => clearTimeout(timer);
   }, []);
 
@@ -66,7 +67,7 @@ export default function HomePage() {
   const personalDetails: DetailItemProps[] = [
     { icon: User, label: "Age", value: "20" },
     { icon: MapPin, label: "Location", value: "Idukki, Kerala" },
-    { icon: Briefcase, label: "Studying", value: "Cyber Forensic Student" },
+    { icon: GraduationCap, label: "Studying", value: "Cyber Forensic Student" },
   ];
 
   const hobbies = [
@@ -83,7 +84,7 @@ export default function HomePage() {
       <div className={cn(
           "min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden",
           !isPageLoading ? "opacity-100" : "opacity-0",
-          "transition-opacity duration-700 ease-in-out delay-100" // Added delay for smoother transition
+          "transition-opacity duration-700 ease-in-out delay-100" 
         )}
       >
         <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -111,14 +112,15 @@ export default function HomePage() {
             Alosious Benny
           </h1>
           
-          {/* Personal Details Section */}
+          
           <div className="max-w-xl mb-8 space-y-3">
             {personalDetails.map(detail => (
               <DetailItem key={detail.label} icon={detail.icon} label={detail.label} value={detail.value} />
             ))}
           </div>
 
-          {/* Hobbies/Interests Section */}
+          <JourneyTimeline />
+          
           <div className="max-w-2xl w-full mb-10 text-left px-4 sm:px-6">
             <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-center text-foreground flex items-center justify-center gap-2">
               <Lightbulb className="h-7 w-7 text-primary" />
@@ -153,7 +155,7 @@ export default function HomePage() {
           </div>
 
 
-          {/* Social Links Section */}
+          
           <div className="mt-12 pt-10 border-t border-border/60 w-full max-w-lg">
             <h2 className="text-base uppercase text-muted-foreground mb-6 tracking-wider font-semibold">Connect With Me</h2>
             <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-4">
