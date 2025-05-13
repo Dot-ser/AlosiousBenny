@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
-import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic, GraduationCap } from 'lucide-react';
+import { Github, Instagram, Linkedin, Twitter, Facebook, Send, ExternalLink, User, MapPin, Briefcase, Lightbulb, FolderGit2, ListMusic, GraduationCap, ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { HomePageLoader } from '@/components/home-page-loader';
 import { cn } from '@/lib/utils';
@@ -51,7 +51,7 @@ export default function HomePage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsPageLoading(false);
-    }, 1500); 
+    }, 1500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -78,92 +78,122 @@ export default function HomePage() {
     "Learning new Programming Languages & Frameworks",
   ];
 
+  const scrollToSection = (sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
       <HomePageLoader isLoading={isPageLoading} />
       <div className={cn(
-          "min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden",
+          "min-h-screen bg-background text-foreground flex flex-col relative overflow-x-hidden", // Added overflow-x-hidden
           !isPageLoading ? "opacity-100" : "opacity-0",
-          "transition-opacity duration-700 ease-in-out delay-100" 
+          "transition-opacity duration-700 ease-in-out delay-100"
         )}
       >
         <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Logo />
+            <nav className="hidden md:flex items-center gap-4">
+              <Button variant="ghost" onClick={() => scrollToSection('profile')}>Profile</Button>
+              <Button variant="ghost" onClick={() => scrollToSection('journey')}>Journey</Button>
+              <Button variant="ghost" onClick={() => scrollToSection('interests')}>Interests</Button>
+            </nav>
             <div className="flex items-center gap-2">
               <ThemeToggle />
             </div>
           </div>
         </header>
 
-        <main className="flex-grow container mx-auto px-4 py-12 sm:py-16 md:py-20 flex flex-col items-center text-center z-10">
-          <div className="mb-8">
-            <Image
-              src="/images/logo.jpg"
-              alt="Alosious Benny"
-              width={160}
-              height={160}
-              className="rounded-full shadow-2xl border-4 border-primary/50 object-cover"
-              priority
-              data-ai-hint="profile picture person"
-            />
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 tracking-tight">
-            Alosious Benny
-          </h1>
-          
-          
-          <div className="max-w-xl mb-8 space-y-3">
-            {personalDetails.map(detail => (
-              <DetailItem key={detail.label} icon={detail.icon} label={detail.label} value={detail.value} />
-            ))}
-          </div>
-
-          <JourneyTimeline />
-          
-          <div className="max-w-2xl w-full mb-10 text-left px-4 sm:px-6">
-            <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-center text-foreground flex items-center justify-center gap-2">
-              <Lightbulb className="h-7 w-7 text-primary" />
-              Interests & Activities
-            </h2>
-            <ul className="list-none space-y-3 text-muted-foreground">
-              {hobbies.map((hobby, index) => (
-                <li key={index} className="flex items-start p-3 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <span className="text-primary mr-3 mt-1">&#10003;</span> 
-                  <span className="text-lg">{hobby}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <Button asChild size="lg" className="px-8 py-6 text-lg shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
-              <Link href="/gallery">
-                Explore My Gallery <ExternalLink size={20} className="ml-2" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="px-8 py-6 text-lg shadow-lg hover:shadow-accent/30 transition-all duration-300 transform hover:scale-105">
-              <a href="https://github.com/Dot-ser?tab=repositories" target="_blank" rel="noopener noreferrer">
-                My Projects <FolderGit2 size={20} className="ml-2" />
-              </a>
-            </Button>
-            <Button asChild size="lg" variant="secondary" className="px-8 py-6 text-lg shadow-lg hover:shadow-muted-foreground/30 transition-all duration-300 transform hover:scale-105">
-              <Link href="/playlist">
-                 My Playlist <ListMusic size={20} className="ml-2" />
-              </Link>
-            </Button>
-          </div>
-
-
-          
-          <div className="mt-12 pt-10 border-t border-border/60 w-full max-w-lg">
-            <h2 className="text-base uppercase text-muted-foreground mb-6 tracking-wider font-semibold">Connect With Me</h2>
-            <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-4">
-              {socialLinks.map((link) => (
-                <SocialLinkItem key={link.href} {...link} />
-              ))}
+        <main className="flex-grow">
+          {/* Section 1: Profile */}
+          <section id="profile" className="min-h-screen flex flex-col items-center justify-center text-center py-16 px-4 relative">
+            <div className="container mx-auto flex flex-col items-center">
+              <div className="mb-8">
+                <Image
+                  src="/images/logo.jpg"
+                  alt="Alosious Benny"
+                  width={160}
+                  height={160}
+                  className="rounded-full shadow-2xl border-4 border-primary/50 object-cover"
+                  priority
+                  data-ai-hint="profile picture person"
+                />
+              </div>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 tracking-tight">
+                Alosious Benny
+              </h1>
+              <div className="max-w-xl mb-8 space-y-3">
+                {personalDetails.map(detail => (
+                  <DetailItem key={detail.label} icon={detail.icon} label={detail.label} value={detail.value} />
+                ))}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                <Button asChild size="lg" className="px-8 py-6 text-lg shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
+                  <Link href="/gallery">
+                    Explore My Gallery <ExternalLink size={20} className="ml-2" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="px-8 py-6 text-lg shadow-lg hover:shadow-accent/30 transition-all duration-300 transform hover:scale-105">
+                  <a href="https://github.com/Dot-ser?tab=repositories" target="_blank" rel="noopener noreferrer">
+                    My Projects <FolderGit2 size={20} className="ml-2" />
+                  </a>
+                </Button>
+                <Button asChild size="lg" variant="secondary" className="px-8 py-6 text-lg shadow-lg hover:shadow-muted-foreground/30 transition-all duration-300 transform hover:scale-105">
+                  <Link href="/playlist">
+                     My Playlist <ListMusic size={20} className="ml-2" />
+                  </Link>
+                </Button>
+              </div>
+              <Button variant="ghost" onClick={() => scrollToSection('journey')} className="absolute bottom-10 animate-bounce">
+                <ChevronDown size={32} />
+                <span className="sr-only">Scroll to Journey</span>
+              </Button>
             </div>
-          </div>
+          </section>
+
+          {/* Section 2: Journey */}
+          <section id="journey" className="min-h-screen flex flex-col items-center justify-center py-16 px-4 bg-secondary/30 relative">
+            <div className="container mx-auto">
+              <JourneyTimeline />
+            </div>
+            <Button variant="ghost" onClick={() => scrollToSection('interests')} className="absolute bottom-10 animate-bounce">
+              <ChevronDown size={32} />
+              <span className="sr-only">Scroll to Interests</span>
+            </Button>
+          </section>
+
+          {/* Section 3: Interests & Connect */}
+          <section id="interests" className="min-h-screen flex flex-col items-center justify-center py-16 px-4 relative">
+            <div className="container mx-auto flex flex-col items-center">
+              <div className="max-w-2xl w-full mb-10 text-left">
+                <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-center text-foreground flex items-center justify-center gap-2">
+                  <Lightbulb className="h-7 w-7 text-primary" />
+                  Interests & Activities
+                </h2>
+                <ul className="list-none space-y-3 text-muted-foreground">
+                  {hobbies.map((hobby, index) => (
+                    <li key={index} className="flex items-start p-3 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      <span className="text-primary mr-3 mt-1">&#10003;</span>
+                      <span className="text-lg">{hobby}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-12 pt-10 border-t border-border/60 w-full max-w-lg">
+                <h2 className="text-base uppercase text-muted-foreground mb-6 tracking-wider font-semibold text-center">Connect With Me</h2>
+                <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-4">
+                  {socialLinks.map((link) => (
+                    <SocialLinkItem key={link.href} {...link} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
         </main>
 
         <footer className="text-center p-8 text-sm text-muted-foreground border-t border-border/60 z-10">
@@ -173,3 +203,4 @@ export default function HomePage() {
     </>
   );
 }
+
