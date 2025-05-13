@@ -13,7 +13,7 @@ import { Logo } from '@/components/logo';
 import { getImagesAction, toggleLikeAction } from '@/actions/imageActions';
 import { useToast } from '@/hooks/use-toast';
 import { PageLoader } from '@/components/page-loader';
-import { ScrollCue } from '@/components/scroll-cue'; // Added import
+import { ScrollCue } from '@/components/scroll-cue';
 import { cn } from '@/lib/utils';
 
 
@@ -31,7 +31,7 @@ export default function GalleryPage() {
   const { toast } = useToast();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  const [showScrollCue, setShowScrollCue] = useState(false); // State for scroll cue
+  const [showScrollCue, setShowScrollCue] = useState(false);
 
   const fetchImagesCallback = useCallback(async (page: number, limit: number, append: boolean = false) => {
     if (append) {
@@ -44,13 +44,9 @@ export default function GalleryPage() {
     try {
       const result = await getImagesAction(page, limit);
       setImages(prevImages => {
-        if (append) {
-          const existingImageIds = new Set(prevImages.map(img => img.id));
-          const newUniqueImages = result.images.filter(img => !existingImageIds.has(img.id));
-          return [...prevImages, ...newUniqueImages];
-        } else {
-          return result.images;
-        }
+        const currentImageIds = new Set(prevImages.map(img => img.id));
+        const newUniqueImages = result.images.filter(img => !currentImageIds.has(img.id));
+        return append ? [...prevImages, ...newUniqueImages] : result.images;
       });
       setHasMoreImages(result.hasMore);
       setCurrentPage(page);
@@ -89,16 +85,15 @@ export default function GalleryPage() {
     });
   }, [fetchImagesCallback]);
 
-  // Effect for showing and hiding scroll cue
   useEffect(() => {
     if (isPageReady && images.length > 0 && hasMoreImages) {
       setShowScrollCue(true);
       const timer = setTimeout(() => {
         setShowScrollCue(false);
-      }, 7000); // Hide after 7 seconds
+      }, 7000); 
 
       const handleScroll = () => {
-        if (window.scrollY > 50) { // Hide after scrolling a bit
+        if (window.scrollY > 50) { 
           setShowScrollCue(false);
           window.removeEventListener('scroll', handleScroll);
           clearTimeout(timer);
@@ -110,9 +105,9 @@ export default function GalleryPage() {
         clearTimeout(timer);
       };
     } else {
-      setShowScrollCue(false); // Ensure it's hidden if conditions aren't met
+      setShowScrollCue(false);
     }
-  }, [isPageReady, images, hasMoreImages]); // images (object) as dep for its length
+  }, [isPageReady, images, hasMoreImages]);
 
   const handleLoadMore = useCallback(() => {
     if (hasMoreImages && !isFetchingMoreImages && !isFetchingInitialImages && isPageReady) { 
@@ -129,7 +124,10 @@ export default function GalleryPage() {
           handleLoadMore();
         }
       },
-      { threshold: 1.0 } 
+      { 
+        rootMargin: '600px 0px', // Fetch when the loader is 600px from viewport vertical edges
+        threshold: 0.01 // Trigger as soon as 1% of the loader is visible within the rootMargin
+      } 
     );
     observerRef.current = currentObserver;
 
@@ -203,6 +201,7 @@ export default function GalleryPage() {
            toast({ title: 'Share Canceled', description: 'Sharing was canceled by the user.' });
           return;
         }
+         // Fallback to clipboard if navigator.share fails for other reasons (e.g. permission denied)
       }
     }
 
@@ -211,7 +210,7 @@ export default function GalleryPage() {
         await navigator.clipboard.writeText(shareUrl);
         toast({
           title: 'Link Copied!',
-          description: `Link to "${caption}" copied to clipboard. ${!navigator.share ? 'Direct share not available.' : 'Sharing permission denied or failed.'}`
+          description: `Link to "${caption}" copied to clipboard. ${!navigator.share ? 'Direct share not available on this browser.' : 'Sharing via system dialog failed or was denied.'}`
         });
       } catch (error: any) {
         console.error('Clipboard API failed:', error);
@@ -291,3 +290,4 @@ export default function GalleryPage() {
     </>
   );
 }
+
