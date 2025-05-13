@@ -1,13 +1,29 @@
-
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"; 
+import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
 export const metadata: Metadata = {
   title: 'DOT007 - Alosious Benny',
-  description: 'Portfolio and Gallery of Alosious Benny, showcasing projects and images with AI hashtag suggestions.',
+  description: 'Alosious Benny , Song4u - Lesson My Favorite Songs',
+  keywords: ['Alosious Benny', 'Song4u', 'Music', 'Player', 'Web App'],
+  authors: [{ name: 'DOTSERMODZ' }],
+  themeColor: '#000000',
+  openGraph: {
+    title: 'Alosious Benny , Favorite Playlist',
+    description: 'Alosious Benny , Song4u - listen to My Favorite Songs',
+    url: 'https://alosiousbenny.vercel.app/Playlist',
+    type: 'website',
+    siteName: 'Alosious Benny',
+    images: ['https://files.catbox.moe/jkwu5t.jpg'],
+  },
+  icons: {
+    icon: 'https://files.catbox.moe/alaz7q.png',
+  },
+  twitter: {
+    images: ['https://files.catbox.moe/jkwu5t.jpg'],
+  },
 };
 
 export default function RootLayout({
@@ -41,4 +57,3 @@ export default function RootLayout({
     </html>
   );
 }
-
