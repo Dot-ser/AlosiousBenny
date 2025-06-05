@@ -98,7 +98,7 @@ export default function HomePage() {
   const personalDetails: DetailItemProps[] = [
     { icon: User, label: "Age", value: "20" },
     { icon: MapPin, label: "Location", value: "Idukki, Kerala" },
-    { icon: GraduationCap, label: "Studying", value: "Cyber Forensic Student" },
+    { icon: GraduationCap, label: "Studying", value: "Cyber Forensic" },
   ];
 
   const hobbies = [
