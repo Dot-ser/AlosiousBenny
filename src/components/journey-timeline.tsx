@@ -3,7 +3,7 @@
 
 import { motion } from 'framer-motion';
 import React from 'react';
-import { School, ShieldCheck, CalendarDays, Milestone } from 'lucide-react'; // Added Milestone for a generic start
+import { School, ShieldCheck, CalendarDays, Milestone } from 'lucide-react'; 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface JourneyItem {
@@ -15,12 +15,6 @@ interface JourneyItem {
 
 const journeyData: JourneyItem[] = [
   {
-    year: '2021',
-    title: 'Completed 10th Grade',
-    description: 'Successfully completed my secondary school education, laying the foundation for future studies.',
-    icon: School,
-  },
-  {
     year: '2023',
     title: 'Completed 12th Grade',
     description: 'Graduated higher secondary, focusing on subjects that sparked my interest in technology and security.',
@@ -30,7 +24,13 @@ const journeyData: JourneyItem[] = [
     year: '2023 - Present',
     title: 'B.Sc. Cyber Forensics',
     description: 'Currently pursuing a Bachelor of Science degree, specializing in Cyber Forensics and digital investigation techniques.',
-    icon: ShieldCheck,
+    icon: ShieldCheck, 
+  },
+  {
+    year: '2024',
+    title: 'Vulnerability Assessment & Penetration Testing',
+    description: 'Completed comprehensive training in Vulnerability Assessment and Penetration Testing (VAPT), enhancing practical cybersecurity skills.',
+    icon: ShieldCheck, // Using ShieldCheck as it's relevant for security/VAPT
   },
 ];
 
